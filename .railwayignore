@@ -1,0 +1,29 @@
+# Virtual Environment
+.venv/
+venv/
+env/
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+.pytest_cache/
+tests/
+
+# Local files
+*.log
+.DS_Store
+
+# Don't ignore .env - Railway needs it for reference
+# (but we'll set env vars in Railway dashboard)
+
