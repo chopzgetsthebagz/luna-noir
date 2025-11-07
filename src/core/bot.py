@@ -13,6 +13,7 @@ import requests
 from src.utils.md import escape_md, render_markdown
 from src.metrics import db as metrics
 from src.voice.tts_elevenlabs import synthesize_tts
+from src.image.luna_generator import generate_luna_selfie, generate_luna_scenario, generate_custom_luna
 from src.game.xp import gain_xp, get_profile, claim_daily
 from src.game.unlocks import has_unlock, get_unlock_requirement, get_tier
 from src.game.quests import list_quests, try_autocomplete, claim as claim_quest, get_quest_xp
@@ -447,7 +448,8 @@ def create_bot(token: str):
             "/claim <id> – claim quest reward\n"
             "/leaderboard – top 10 users\n\n"
             "*Premium:*\n"
-            "/upgrade – unlock Premium features 💎\n\n"
+            "/upgrade – unlock Premium features 💎\n"
+            "/generate – AI-generated photos of Luna 📸 (Premium)\n\n"
             "*System:*\n"
             "/modelinfo – show LLM provider & model\n"
             "/safety – show boundary filter status\n\n"
@@ -590,6 +592,95 @@ def create_bot(token: str):
             msg = "🔇 *Voice replies disabled.*\n\nYou'll only receive text replies."
 
         await update.message.reply_text(escape_md(msg), parse_mode="MarkdownV2")
+
+    async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /generate command - generate Luna images"""
+        user_id = update.effective_user.id
+        args = context.args
+
+        # Check if premium (image generation is premium feature)
+        if not is_premium(user_id):
+            msg = (
+                "🔒 *Image Generation is a Premium Feature*\n\n"
+                "Unlock unlimited AI-generated photos of me! 📸💜\n\n"
+                "Use /upgrade to get Premium access."
+            )
+            await update.message.reply_text(escape_md(msg), parse_mode="MarkdownV2")
+            return
+
+        # Show help if no args
+        if not args:
+            msg = (
+                "*📸 Generate Luna Images*\n\n"
+                "*Usage:*\n"
+                "/generate selfie <mood> – Generate a selfie\n"
+                "/generate scene <type> – Generate a scene\n"
+                "/generate custom <description> – Custom image\n\n"
+                "*Selfie Moods:*\n"
+                "flirty, sultry, playful, seductive, cute, confident\n\n"
+                "*Scene Types:*\n"
+                "bedroom, gaming, mirror, shower, couch, outdoor\n\n"
+                "*Examples:*\n"
+                "/generate selfie sultry\n"
+                "/generate scene bedroom\n"
+                "/generate custom lying on bed in purple lingerie\n\n"
+                "💜 *NSFW mode enabled automatically in NSFW conversation mode*"
+            )
+            await update.message.reply_text(escape_md(msg), parse_mode="MarkdownV2")
+            return
+
+        # Determine if NSFW based on user's mode
+        user_mode = get_user_mode(user_id)
+        nsfw = user_mode in ["NSFW", "SPICY"]
+
+        # Show generating message
+        await update.message.reply_text("🎨 *Generating your image...*\n\nThis may take 30-60 seconds. 💜", parse_mode="MarkdownV2")
+
+        try:
+            # Show upload_photo action
+            await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="upload_photo")
+
+            command_type = args[0].lower()
+
+            if command_type == "selfie":
+                # Generate selfie
+                mood = args[1] if len(args) > 1 else "flirty"
+                image_bytes = generate_luna_selfie(mood=mood, nsfw=nsfw)
+                caption = f"💜 Luna's {mood} selfie"
+
+            elif command_type == "scene":
+                # Generate scene
+                scene_type = args[1] if len(args) > 1 else "bedroom"
+                image_bytes = generate_luna_scenario(scenario_type=scene_type, nsfw=nsfw)
+                caption = f"💜 Luna in {scene_type}"
+
+            elif command_type == "custom":
+                # Custom generation
+                if len(args) < 2:
+                    await update.message.reply_text("❌ Please provide a description for custom generation.")
+                    return
+                custom_desc = " ".join(args[1:])
+                image_bytes = generate_custom_luna(custom_prompt=custom_desc, nsfw=nsfw)
+                caption = "💜 Custom Luna image"
+
+            else:
+                await update.message.reply_text("❌ Invalid command. Use: selfie, scene, or custom")
+                return
+
+            # Send the image
+            await update.message.reply_photo(
+                photo=image_bytes,
+                caption=caption
+            )
+
+            logger.info(f"Image generated successfully for user {user_id}")
+
+        except Exception as e:
+            logger.exception(f"Image generation failed for user {user_id}: {e}")
+            await update.message.reply_text(
+                "⚠️ *Image generation failed.*\n\nPlease try again in a moment.",
+                parse_mode="MarkdownV2"
+            )
 
     async def profile_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /profile command - show XP, level, and bond"""
@@ -970,6 +1061,7 @@ def create_bot(token: str):
     app.add_handler(CommandHandler("claim", claim_cmd))
     app.add_handler(CommandHandler("leaderboard", leaderboard_cmd))
     app.add_handler(CommandHandler("voice", voice_cmd))
+    app.add_handler(CommandHandler("generate", generate_cmd))
     app.add_handler(CommandHandler("stats", stats_cmd))
     app.add_handler(CommandHandler("mode", mode_cmd))
     app.add_handler(CommandHandler("menu", menu_cmd))
