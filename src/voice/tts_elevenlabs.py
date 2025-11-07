@@ -45,9 +45,12 @@ def synthesize_tts(text: str, voice_id: str = None) -> bytes:
     payload = {
         "text": text[:1000],  # Keep it short for latency
         "voice_settings": {
-            "stability": 0.5,
-            "similarity_boost": 0.7
-        }
+            "stability": 0.75,           # Higher = more stable, slower, sultry
+            "similarity_boost": 0.85,    # Higher = more expressive
+            "style": 0.5,                # Add emotional range
+            "use_speaker_boost": True    # Enhance voice clarity
+        },
+        "model_id": "eleven_multilingual_v2"  # Better quality model
     }
     
     logger.info(f"Synthesizing TTS for {len(text)} chars with voice {v}")
