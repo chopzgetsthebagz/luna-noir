@@ -922,20 +922,19 @@ def create_bot(token: str):
                 else:
                     try:
                         logger.info(f"Generating voice reply for user {user_id}")
-                        # Show upload_audio action while generating TTS
-                        await context.bot.send_chat_action(chat_id=chat_id, action="upload_audio")
+                        # Show upload_voice action while generating TTS
+                        await context.bot.send_chat_action(chat_id=chat_id, action="upload_voice")
 
                         # Generate TTS audio
                         audio_bytes = synthesize_tts(reply)
 
-                        # Send audio via Telegram Bot API
-                        # Using requests.post for file upload
-                        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendAudio"
-                        files = {"audio": ("luna.mp3", audio_bytes, "audio/mpeg")}
+                        # Send as VOICE MESSAGE (not audio) to prevent auto-play queue
+                        # This ensures each voice message plays independently
+                        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendVoice"
+                        files = {"voice": ("luna.ogg", audio_bytes, "audio/ogg")}
                         data = {
                             "chat_id": chat_id,
-                            "title": "Luna Noir",
-                            "caption": "🎧 voice reply"
+                            "caption": "🎧"
                         }
 
                         response = requests.post(url, files=files, data=data, timeout=60)
