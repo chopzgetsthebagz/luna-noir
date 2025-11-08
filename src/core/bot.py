@@ -920,7 +920,7 @@ def create_bot(token: str):
                         InlineKeyboardButton("🔥 Topless Photo", callback_data="gen_scene_topless")
                     ],
                     [
-                        InlineKeyboardButton("🔞 Nude Photo", callback_data="gen_scene_nude"),
+                        InlineKeyboardButton("🔞 Nude Poses", callback_data="menu_nude_poses"),
                         InlineKeyboardButton("👗 Choose Outfit", callback_data="menu_outfits")
                     ],
                     [
@@ -1080,6 +1080,43 @@ def create_bot(token: str):
                 reply_markup=reply_markup
             )
 
+        elif data == "menu_nude_poses":
+            # Show nude pose selection menu (NSFW only)
+            user_mode = get_user_mode(user_id)
+            is_nsfw = user_mode in ["NSFW", "SPICY"]
+
+            if not is_nsfw:
+                await query.answer("🔒 Nude poses require NSFW mode!", show_alert=True)
+                return
+
+            keyboard = [
+                [
+                    InlineKeyboardButton("🧍‍♀️ Standing Nude", callback_data="gen_scene_nude"),
+                    InlineKeyboardButton("🛏️ Lying Nude", callback_data="gen_scene_nude_lying")
+                ],
+                [
+                    InlineKeyboardButton("💺 Sitting Nude", callback_data="gen_scene_nude_sitting"),
+                    InlineKeyboardButton("🙏 Kneeling Nude", callback_data="gen_scene_nude_kneeling")
+                ],
+                [
+                    InlineKeyboardButton("🍑 Bent Over Nude", callback_data="gen_scene_nude_bent_over"),
+                    InlineKeyboardButton("↔️ Side View Nude", callback_data="gen_scene_nude_side_view")
+                ],
+                [
+                    InlineKeyboardButton("🚿 Shower Nude", callback_data="gen_scene_shower"),
+                    InlineKeyboardButton("🧍 Full Body Nude", callback_data="gen_scene_fullbody")
+                ],
+                [InlineKeyboardButton("« Back", callback_data="menu_generate")]
+            ]
+
+            msg = "🔞 *Choose Nude Pose* \\(Explicit\\)\n\nSelect a nude pose\\. All photos are fully explicit\\."
+
+            await query.edit_message_text(
+                msg,
+                parse_mode="MarkdownV2",
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
+
         elif data == "menu_outfits":
             # Show outfit selection menu
             user_mode = get_user_mode(user_id)
@@ -1222,9 +1259,9 @@ def create_bot(token: str):
                     caption = f"💜 Luna's {style} selfie"
 
                 elif gen_type == "scene":
-                    style = parts[2]  # bedroom, gaming, etc.
+                    style = "_".join(parts[2:])  # bedroom, gaming, nude_lying, etc.
                     image_bytes = generate_luna_scenario(scenario_type=style, nsfw=nsfw)
-                    caption = f"💜 Luna - {style}"
+                    caption = f"💜 Luna - {style.replace('_', ' ')}"
 
                 elif gen_type == "outfit":
                     outfit_name = "_".join(parts[2:])  # lingerie_lace, casual, etc.

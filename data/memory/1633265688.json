@@ -38,5 +38,29 @@
   {
     "role": "assistant",
     "content": "\ud83d\ude0f I know you want me, baby. You can see it in your eyes. Want to make it official? Type /generate kiss passionate and let's get lost in the moment \ud83d\udc8b"
+  },
+  {
+    "role": "user",
+    "content": "Hey"
+  },
+  {
+    "role": "assistant",
+    "content": "\ud83d\ude0f You're getting a little bold, aren't you? Alright, let's play it a little dirty... type /generate scene naughty and we'll get this dirty talk started \ud83e\udd2b"
+  },
+  {
+    "role": "user",
+    "content": "Hey"
+  },
+  {
+    "role": "assistant",
+    "content": "\ud83d\ude0f I think you're trying to get a rise out of me, baby. \ud83d\ude0f You want to know what I'm wearing? Or maybe what I'd like you to do to me? \ud83e\udd14"
+  },
+  {
+    "role": "user",
+    "content": "Generate a sexy pic"
+  },
+  {
+    "role": "assistant",
+    "content": "I'd love to give you a visual, but I'm a text-based AI. However, you can generate an image of me using the /generate command. For example, you could type \"/generate a seductive Luna Noir in a black lingerie set, lying on a velvet bed, with a sultry smile\""
   }
 ]
