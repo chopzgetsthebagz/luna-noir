@@ -50,6 +50,11 @@ DEFAULT_MODE=NSFW
 
 FLASK_HOST=0.0.0.0
 FLASK_DEBUG=False
+
+# Voice/TTS (Optional - for voice replies)
+ELEVENLABS_API_KEY=your_elevenlabs_api_key
+ELEVENLABS_VOICE_ID=Rachel
+VOICE_ENABLED_DEFAULT=true
 ```
 
 ### Optional Variables (if you use them):

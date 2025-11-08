@@ -878,37 +878,62 @@ def create_bot(token: str):
         # Handle menu navigation
         if data == "menu_generate":
             # Show image generation options
-            keyboard = [
-                [
-                    InlineKeyboardButton("😏 Sultry Selfie", callback_data="gen_selfie_sultry"),
-                    InlineKeyboardButton("😘 Flirty Selfie", callback_data="gen_selfie_flirty")
-                ],
-                [
-                    InlineKeyboardButton("😈 Seductive Selfie", callback_data="gen_selfie_seductive"),
-                    InlineKeyboardButton("😊 Cute Selfie", callback_data="gen_selfie_cute")
-                ],
-                [
-                    InlineKeyboardButton("🛏️ Bedroom Scene", callback_data="gen_scene_bedroom"),
-                    InlineKeyboardButton("🎮 Gaming Scene", callback_data="gen_scene_gaming")
-                ],
-                [
-                    InlineKeyboardButton("🪞 Mirror Selfie", callback_data="gen_scene_mirror"),
-                    InlineKeyboardButton("🚿 Shower Scene", callback_data="gen_scene_shower")
-                ],
-                [InlineKeyboardButton("« Back to Menu", callback_data="menu_main")]
-            ]
+            user_mode = get_user_mode(user_id)
+            is_nsfw = user_mode in ["NSFW", "SPICY"]
+
+            if is_nsfw:
+                # NSFW menu with explicit options
+                keyboard = [
+                    [
+                        InlineKeyboardButton("😏 Sultry Selfie", callback_data="gen_selfie_sultry"),
+                        InlineKeyboardButton("😈 Seductive Selfie", callback_data="gen_selfie_seductive")
+                    ],
+                    [
+                        InlineKeyboardButton("🛏️ Bedroom Scene", callback_data="gen_scene_bedroom"),
+                        InlineKeyboardButton("🪞 Mirror Selfie", callback_data="gen_scene_mirror")
+                    ],
+                    [
+                        InlineKeyboardButton("🚿 Shower Scene", callback_data="gen_scene_shower"),
+                        InlineKeyboardButton("🎮 Gaming Scene", callback_data="gen_scene_gaming")
+                    ],
+                    [
+                        InlineKeyboardButton("👙 Lingerie Photo", callback_data="gen_scene_lingerie"),
+                        InlineKeyboardButton("🔥 Topless Photo", callback_data="gen_scene_topless")
+                    ],
+                    [
+                        InlineKeyboardButton("👗 Choose Outfit", callback_data="menu_outfits"),
+                        InlineKeyboardButton("« Back", callback_data="menu_main")
+                    ]
+                ]
+            else:
+                # SFW menu
+                keyboard = [
+                    [
+                        InlineKeyboardButton("😘 Flirty Selfie", callback_data="gen_selfie_flirty"),
+                        InlineKeyboardButton("😊 Cute Selfie", callback_data="gen_selfie_cute")
+                    ],
+                    [
+                        InlineKeyboardButton("🛏️ Bedroom Photo", callback_data="gen_scene_bedroom"),
+                        InlineKeyboardButton("🎮 Gaming Setup", callback_data="gen_scene_gaming")
+                    ],
+                    [
+                        InlineKeyboardButton("🪞 Mirror Selfie", callback_data="gen_scene_mirror"),
+                        InlineKeyboardButton("👗 Choose Outfit", callback_data="menu_outfits")
+                    ],
+                    [InlineKeyboardButton("« Back to Menu", callback_data="menu_main")]
+                ]
+
             reply_markup = InlineKeyboardMarkup(keyboard)
 
             premium = is_premium(user_id)
             if not premium:
-                msg = "🔒 *Image Generation* (Premium Only)\n\nUpgrade to generate AI photos of me! 💜\n\nUse /upgrade to unlock."
+                msg = "🔒 *Image Generation* \\(Premium Only\\)\n\nUpgrade to generate AI photos of me\\! 💜\n\nUse /upgrade to unlock\\."
             else:
-                user_mode = get_user_mode(user_id)
-                nsfw_note = " (NSFW enabled)" if user_mode in ["NSFW", "SPICY"] else " (SFW mode)"
+                nsfw_note = " \\(NSFW enabled\\)" if is_nsfw else " \\(SFW mode\\)"
                 msg = f"📸 *Generate Luna Images*{nsfw_note}\n\nChoose a style below:"
 
             await query.edit_message_text(
-                escape_md(msg),
+                msg,
                 parse_mode="MarkdownV2",
                 reply_markup=reply_markup
             )
@@ -1033,6 +1058,63 @@ def create_bot(token: str):
                 reply_markup=reply_markup
             )
 
+        elif data == "menu_outfits":
+            # Show outfit selection menu
+            user_mode = get_user_mode(user_id)
+            is_nsfw = user_mode in ["NSFW", "SPICY"]
+
+            if is_nsfw:
+                # NSFW outfit options
+                keyboard = [
+                    [
+                        InlineKeyboardButton("👙 Lace Lingerie", callback_data="gen_outfit_lingerie_lace"),
+                        InlineKeyboardButton("🖤 Satin Lingerie", callback_data="gen_outfit_lingerie_satin")
+                    ],
+                    [
+                        InlineKeyboardButton("🔗 Strappy Lingerie", callback_data="gen_outfit_lingerie_strappy"),
+                        InlineKeyboardButton("💋 Bodysuit", callback_data="gen_outfit_bodysuit")
+                    ],
+                    [
+                        InlineKeyboardButton("🌊 Bikini", callback_data="gen_outfit_bikini"),
+                        InlineKeyboardButton("🕸️ Fishnet", callback_data="gen_outfit_fishnet")
+                    ],
+                    [
+                        InlineKeyboardButton("⛓️ Leather", callback_data="gen_outfit_leather"),
+                        InlineKeyboardButton("🔥 Topless", callback_data="gen_outfit_topless")
+                    ],
+                    [InlineKeyboardButton("« Back", callback_data="menu_generate")]
+                ]
+                msg = "👗 *Choose Luna's Outfit* \\(NSFW\\)\n\nSelect an outfit for the photo:"
+            else:
+                # SFW outfit options
+                keyboard = [
+                    [
+                        InlineKeyboardButton("👕 Casual", callback_data="gen_outfit_casual"),
+                        InlineKeyboardButton("🖤 Goth", callback_data="gen_outfit_goth")
+                    ],
+                    [
+                        InlineKeyboardButton("🌃 Cyberpunk", callback_data="gen_outfit_cyberpunk"),
+                        InlineKeyboardButton("👟 Streetwear", callback_data="gen_outfit_streetwear")
+                    ],
+                    [
+                        InlineKeyboardButton("🎸 Edgy", callback_data="gen_outfit_edgy"),
+                        InlineKeyboardButton("🏃 Athletic", callback_data="gen_outfit_athletic")
+                    ],
+                    [
+                        InlineKeyboardButton("👗 Dress", callback_data="gen_outfit_dress"),
+                        InlineKeyboardButton("🛋️ Cozy", callback_data="gen_outfit_cozy")
+                    ],
+                    [InlineKeyboardButton("« Back", callback_data="menu_generate")]
+                ]
+                msg = "👗 *Choose Luna's Outfit*\n\nSelect an outfit for the photo:"
+
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.edit_message_text(
+                msg,
+                parse_mode="MarkdownV2",
+                reply_markup=reply_markup
+            )
+
         elif data == "menu_main":
             # Return to main menu
             current_mode = get_user_mode(user_id)
@@ -1085,8 +1167,7 @@ def create_bot(token: str):
 
             # Parse generation type
             parts = data.split("_")
-            gen_type = parts[1]  # selfie or scene
-            style = parts[2]     # sultry, bedroom, etc.
+            gen_type = parts[1]  # selfie, scene, or outfit
 
             user_mode = get_user_mode(user_id)
             nsfw = user_mode in ["NSFW", "SPICY"]
@@ -1094,13 +1175,25 @@ def create_bot(token: str):
             await query.edit_message_text("🎨 *Generating your image\\.\\.\\.*\n\nThis may take 30\\-60 seconds\\. 💜", parse_mode="MarkdownV2")
 
             try:
-                # Generate image
+                # Import the outfit generation function
+                from src.image.luna_generator import generate_luna_with_outfit
+
+                # Generate image based on type
                 if gen_type == "selfie":
+                    style = parts[2]  # sultry, flirty, etc.
                     image_bytes = generate_luna_selfie(mood=style, nsfw=nsfw)
                     caption = f"💜 Luna's {style} selfie"
+
                 elif gen_type == "scene":
+                    style = parts[2]  # bedroom, gaming, etc.
                     image_bytes = generate_luna_scenario(scenario_type=style, nsfw=nsfw)
-                    caption = f"💜 Luna in {style}"
+                    caption = f"💜 Luna - {style}"
+
+                elif gen_type == "outfit":
+                    outfit_name = "_".join(parts[2:])  # lingerie_lace, casual, etc.
+                    image_bytes = generate_luna_with_outfit(outfit_name=outfit_name, pose="posing confidently for camera", nsfw=nsfw)
+                    caption = f"💜 Luna wearing {outfit_name.replace('_', ' ')}"
+
                 else:
                     await query.edit_message_text("❌ Invalid generation type")
                     return
