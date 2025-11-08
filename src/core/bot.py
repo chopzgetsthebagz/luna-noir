@@ -1160,9 +1160,21 @@ def create_bot(token: str):
 
         # Handle image generation buttons
         if data.startswith("gen_"):
-            premium = is_premium(user_id)
-            if not premium:
-                await query.answer("🔒 Premium only! Use /upgrade", show_alert=True)
+            # Import upsell functions
+            from src.payment import can_generate_image, use_image_generation, get_user_plan, get_image_limit_reached_message, get_after_image_upsell_message
+
+            # Check if user can generate image
+            can_generate, reason = can_generate_image(user_id)
+
+            if not can_generate:
+                # Show upsell message
+                plan = get_user_plan(user_id)
+                msg, keyboard = get_image_limit_reached_message(plan)
+                await query.edit_message_text(
+                    msg,
+                    parse_mode="MarkdownV2",
+                    reply_markup=keyboard
+                )
                 return
 
             # Parse generation type
@@ -1198,6 +1210,9 @@ def create_bot(token: str):
                     await query.edit_message_text("❌ Invalid generation type")
                     return
 
+                # Deduct image credit/usage
+                use_image_generation(user_id)
+
                 # Send the image
                 await context.bot.send_photo(
                     chat_id=chat_id,
@@ -1205,8 +1220,25 @@ def create_bot(token: str):
                     caption=caption
                 )
 
-                # Update message
-                await query.edit_message_text("✅ *Image generated\\!* Check above\\. 💜", parse_mode="MarkdownV2")
+                # Get remaining images for upsell message
+                from src.payment import get_image_credits, has_trial_images, get_trial_status
+                plan = get_user_plan(user_id)
+
+                if plan:
+                    from src.payment.upsell import _load_json, SUBSCRIPTION_DB, PLANS
+                    subs = _load_json(SUBSCRIPTION_DB)
+                    used = subs[str(user_id)].get("images_used_this_month", 0)
+                    limit = PLANS[plan]["limits"]["images_per_month"]
+                    images_remaining = limit - used if limit != -1 else -1
+                else:
+                    images_remaining = get_image_credits(user_id)
+                    if has_trial_images(user_id):
+                        trial = get_trial_status(user_id)
+                        images_remaining += trial.get("images_remaining", 0)
+
+                # Update message with subtle upsell
+                upsell_msg = get_after_image_upsell_message(images_remaining, plan)
+                await query.edit_message_text(escape_md(upsell_msg), parse_mode="MarkdownV2")
 
             except Exception as e:
                 logger.exception(f"Image generation failed: {e}")
@@ -1296,21 +1328,76 @@ def create_bot(token: str):
                 reply_markup=reply_markup
             )
 
-    async def mode_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Handle inline button callbacks for mode selection and upgrade"""
+    async def upsell_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle upsell-related button callbacks"""
         query = update.callback_query
         user_id = update.effective_user.id
         data = query.data
 
-        # Handle upgrade button
-        if data == "upgrade":
-            await query.answer()
-            try:
-                checkout_url = create_checkout_session(user_id)
+        await query.answer()
+
+        from src.payment import (
+            start_free_trial, get_free_trial_offer_message, get_plans_comparison_message,
+            get_credits_shop_message, set_user_plan, add_image_credits, IMAGE_CREDIT_PRICES, PLANS
+        )
+
+        # Handle free trial start
+        if data == "start_trial":
+            success = start_free_trial(user_id)
+            if success:
                 msg = (
-                    "💎 *Upgrade to Premium*\n\n"
-                    "Unlock FLIRTY & NSFW modes, longer conversations, and more!\n\n"
-                    f"[Click here to subscribe]({checkout_url})"
+                    "🎁 *FREE Trial Activated!*\n\n"
+                    "Welcome to Premium! You now have:\n"
+                    "✅ 3 days of full access\n"
+                    "✅ 5 FREE AI images\n"
+                    "✅ NSFW mode unlocked\n"
+                    "✅ Voice messages enabled\n\n"
+                    "Enjoy! 💜"
+                )
+                await query.edit_message_text(escape_md(msg), parse_mode="MarkdownV2")
+            else:
+                msg = "❌ You've already used your free trial. Subscribe to get full access!"
+                await query.edit_message_text(escape_md(msg), parse_mode="MarkdownV2")
+            return
+
+        # Handle show plans
+        elif data == "show_plans":
+            msg, keyboard = get_plans_comparison_message()
+            await query.edit_message_text(msg, parse_mode="MarkdownV2", reply_markup=keyboard)
+            return
+
+        # Handle show credits shop
+        elif data == "show_credits":
+            msg, keyboard = get_credits_shop_message()
+            await query.edit_message_text(msg, parse_mode="MarkdownV2", reply_markup=keyboard)
+            return
+
+        # Handle subscription purchase
+        elif data.startswith("subscribe:"):
+            plan = data.split(":")[1]  # basic, vip, ultimate
+
+            try:
+                import stripe
+                stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+                price_id = PLANS[plan]["stripe_price_id"]
+                success_url = os.getenv("SUCCESS_URL", "https://t.me/Lunanoircompanionbot")
+                cancel_url = os.getenv("CANCEL_URL", "https://t.me/Lunanoircompanionbot")
+
+                session = stripe.checkout.Session.create(
+                    mode="subscription",
+                    line_items=[{"price": price_id, "quantity": 1}],
+                    success_url=success_url,
+                    cancel_url=cancel_url,
+                    metadata={"telegram_user_id": str(user_id), "plan": plan}
+                )
+
+                plan_name = PLANS[plan]["name"]
+                plan_price = PLANS[plan]["price"]
+                msg = (
+                    f"💎 *Subscribe to {plan_name}*\n\n"
+                    f"Price: {plan_price}\n\n"
+                    f"[Click here to complete payment]({session.url})\n\n"
+                    f"After payment, you'll have instant access!"
                 )
                 await query.edit_message_text(
                     escape_md(msg),
@@ -1318,8 +1405,63 @@ def create_bot(token: str):
                     disable_web_page_preview=True
                 )
             except Exception as e:
-                logger.exception("Failed to create checkout session")
+                logger.exception(f"Failed to create checkout session: {e}")
                 await query.edit_message_text("❌ Failed to create checkout session. Please try /upgrade command.")
+            return
+
+        # Handle credit pack purchase
+        elif data.startswith("buy_credits:"):
+            pack = data.split(":")[1]  # 5_pack, 20_pack, 50_pack
+
+            try:
+                import stripe
+                stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+                pack_info = IMAGE_CREDIT_PRICES[pack]
+                price_id = pack_info["stripe_price_id"]
+                success_url = os.getenv("SUCCESS_URL", "https://t.me/Lunanoircompanionbot")
+                cancel_url = os.getenv("CANCEL_URL", "https://t.me/Lunanoircompanionbot")
+
+                session = stripe.checkout.Session.create(
+                    mode="payment",
+                    line_items=[{"price": price_id, "quantity": 1}],
+                    success_url=success_url,
+                    cancel_url=cancel_url,
+                    metadata={"telegram_user_id": str(user_id), "pack": pack}
+                )
+
+                credits = pack_info["credits"]
+                bonus = pack_info.get("bonus", 0)
+                total = credits + bonus
+                price = pack_info["price"]
+
+                msg = (
+                    f"🎫 *Buy {credits} Image Credits*\n\n"
+                    f"Price: {price}\n"
+                    f"You'll get: {total} images{' (includes ' + str(bonus) + ' bonus!)' if bonus else ''}\n\n"
+                    f"[Click here to complete payment]({session.url})"
+                )
+                await query.edit_message_text(
+                    escape_md(msg),
+                    parse_mode="MarkdownV2",
+                    disable_web_page_preview=True
+                )
+            except Exception as e:
+                logger.exception(f"Failed to create checkout session: {e}")
+                await query.edit_message_text("❌ Failed to create checkout session. Please try again.")
+            return
+
+    async def mode_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle inline button callbacks for mode selection and upgrade"""
+        query = update.callback_query
+        user_id = update.effective_user.id
+        data = query.data
+
+        # Handle upgrade button (legacy - redirect to show_plans)
+        if data == "upgrade":
+            await query.answer()
+            from src.payment import get_plans_comparison_message
+            msg, keyboard = get_plans_comparison_message()
+            await query.edit_message_text(msg, parse_mode="MarkdownV2", reply_markup=keyboard)
             return
 
         # Handle locked mode buttons
@@ -1548,6 +1690,7 @@ def create_bot(token: str):
     # Register callback handlers with patterns
     app.add_handler(CallbackQueryHandler(menu_callback, pattern="^menu_"))
     app.add_handler(CallbackQueryHandler(action_callback, pattern="^(gen_|voice_toggle|action_)"))
+    app.add_handler(CallbackQueryHandler(upsell_callback, pattern="^(start_trial|show_plans|show_credits|subscribe:|buy_credits:)"))
     app.add_handler(CallbackQueryHandler(mode_callback))  # Catch-all for mode changes
 
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text))
