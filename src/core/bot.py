@@ -1503,10 +1503,10 @@ def create_bot(token: str):
             #         parse_mode="MarkdownV2",
             #         disable_web_page_preview=True
             #     )
-            except Exception as e:
-                logger.exception(f"Failed to create checkout session: {e}")
-                await query.edit_message_text("❌ Failed to create checkout session. Please try again.")
-            return
+            # except Exception as e:
+            #     logger.exception(f"Failed to create checkout session: {e}")
+            #     await query.edit_message_text("❌ Failed to create checkout session. Please try again.")
+            # return
 
     async def mode_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle inline button callbacks for mode selection and upgrade"""
