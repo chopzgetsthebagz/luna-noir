@@ -14,14 +14,14 @@ def get_image_limit_reached_message(plan: str) -> Tuple[str, InlineKeyboardMarku
     
     if plan == "basic":
         msg = (
-            "📸 *Monthly Image Limit Reached!*\n\n"
-            "You've used all 20 images this month on your Basic plan.\n\n"
+            "📸 *Monthly Image Limit Reached\\!*\n\n"
+            "You've used all 20 images this month on your Basic plan\\.\n\n"
             "*Upgrade to VIP for:*\n"
             "✨ UNLIMITED AI images\n"
             "✨ Custom outfit requests\n"
             "✨ Exclusive VIP scenes\n"
             "✨ Extended memory\n\n"
-            "Or buy a one-time credit pack!"
+            "Or buy a one\\-time credit pack\\!"
         )
         
         keyboard = [
@@ -32,15 +32,15 @@ def get_image_limit_reached_message(plan: str) -> Tuple[str, InlineKeyboardMarku
     
     else:  # Free user
         msg = (
-            "📸 *No Images Remaining!*\n\n"
-            "You've used your free trial images.\n\n"
+            "📸 *No Images Remaining\\!*\n\n"
+            "You've used your free trial images\\.\n\n"
             "*Choose an option:*\n"
             "💜 Subscribe for unlimited access\n"
-            "🎫 Buy one-time credit packs\n\n"
+            "🎫 Buy one\\-time credit packs\n\n"
             "*Premium Plans:*\n"
-            "• Basic: 20 images/month - $9.99\n"
-            "• VIP: UNLIMITED images - $19.99\n"
-            "• Ultimate: Everything - $49.99"
+            "• Basic: 20 images/month \\- $9\\.99\n"
+            "• VIP: UNLIMITED images \\- $19\\.99\n"
+            "• Ultimate: Everything \\- $49\\.99"
         )
         
         keyboard = [
@@ -59,14 +59,14 @@ def get_free_trial_offer_message() -> Tuple[str, InlineKeyboardMarkup]:
     """Offer free trial to new users"""
     
     msg = (
-        "🎁 *Welcome to Luna Noir!*\n\n"
-        "I'd love to get to know you better... 💜\n\n"
-        "*Start your FREE 3-day trial:*\n"
+        "🎁 *Welcome to Luna Noir\\!*\n\n"
+        "I'd love to get to know you better\\.\\.\\. 💜\n\n"
+        "*Start your FREE 3\\-day trial:*\n"
         "✅ 5 FREE AI-generated images\n"
         "✅ NSFW mode unlocked\n"
         "✅ Voice messages\n"
-        "✅ No credit card required!\n\n"
-        "After trial: Subscribe or buy credits anytime."
+        "✅ No credit card required\\!\n\n"
+        "After trial: Subscribe or buy credits anytime\\."
     )
     
     keyboard = [
@@ -89,7 +89,7 @@ def get_nsfw_mode_upsell_message() -> Tuple[str, InlineKeyboardMarkup]:
         "🔥 NSFW AI images\n"
         "🔥 Adult content\n"
         "🔥 No filters\n\n"
-        "*Try it FREE for 3 days!*"
+        "*Try it FREE for 3 days\\!*"
     )
     
     keyboard = [
@@ -107,12 +107,12 @@ def get_voice_upsell_message() -> Tuple[str, InlineKeyboardMarkup]:
     msg = (
         "🔒 *Voice Messages Locked*\n\n"
         "Want to hear my voice? 🎧💜\n\n"
-        "Unlock voice messages with Premium!\n\n"
-        "*Start FREE 3-day trial:*\n"
+        "Unlock voice messages with Premium\\!\n\n"
+        "*Start FREE 3\\-day trial:*\n"
         "✅ Voice messages\n"
         "✅ NSFW mode\n"
         "✅ 5 FREE images\n"
-        "✅ No credit card!"
+        "✅ No credit card\\!"
     )
     
     keyboard = [
@@ -152,8 +152,8 @@ def get_plans_comparison_message() -> Tuple[str, InlineKeyboardMarkup]:
         "✅ 1-on-1 support\n"
         "✅ Request features\n"
         "✅ Credits mention\n\n"
-        
-        "🎁 *All plans: 3-day FREE trial!*"
+
+        "🎁 *All plans: 3\\-day FREE trial\\!*"
     )
     
     keyboard = [
@@ -172,12 +172,12 @@ def get_credits_shop_message() -> Tuple[str, InlineKeyboardMarkup]:
     
     msg = (
         "🎫 *Buy Image Credits*\n\n"
-        "One-time purchase, no subscription!\n\n"
+        "One\\-time purchase, no subscription\\!\n\n"
         "*Credit Packs:*\n"
-        "• 5 images - $2.99\n"
-        "• 20 images - $9.99\n"
-        "• 50 images + 10 BONUS - $19.99\n\n"
-        "💡 *Tip:* VIP subscription ($19.99/mo) gives you UNLIMITED images!"
+        "• 5 images \\- $2\\.99\n"
+        "• 20 images \\- $9\\.99\n"
+        "• 50 images \\+ 10 BONUS \\- $19\\.99\n\n"
+        "💡 *Tip:* VIP subscription \\($19\\.99/mo\\) gives you UNLIMITED images\\!"
     )
     
     keyboard = [
@@ -195,13 +195,13 @@ def get_trial_ending_soon_message(days_left: int, images_left: int) -> str:
     """Message when trial is ending soon"""
     
     return (
-        f"⏰ *Trial Ending Soon!*\n\n"
-        f"You have {days_left} day(s) and {images_left} image(s) left.\n\n"
+        f"⏰ *Trial Ending Soon\\!*\n\n"
+        f"You have {days_left} day\\(s\\) and {images_left} image\\(s\\) left\\.\n\n"
         f"Don't lose access to:\n"
         f"🔥 NSFW mode\n"
         f"📸 AI images\n"
         f"🎧 Voice messages\n\n"
-        f"Subscribe now to keep all features!"
+        f"Subscribe now to keep all features\\!"
     )
 
 
@@ -209,11 +209,11 @@ def get_after_image_upsell_message(images_remaining: int, plan: str) -> str:
     """Subtle upsell after generating an image"""
     
     if plan == "basic":
-        return f"💜 Image generated! You have {images_remaining}/20 images left this month. Upgrade to VIP for unlimited!"
+        return f"💜 Image generated\\! You have {images_remaining}/20 images left this month\\. Upgrade to VIP for unlimited\\!"
     elif plan is None and images_remaining > 0:
-        return f"💜 Image generated! {images_remaining} trial images remaining. Subscribe to get more!"
+        return f"💜 Image generated\\! {images_remaining} trial images remaining\\. Subscribe to get more\\!"
     else:
-        return "💜 Image generated! Enjoying Luna? Upgrade for unlimited images!"
+        return "💜 Image generated\\! Enjoying Luna? Upgrade for unlimited images\\!"
 
 
 def get_conversation_limit_message() -> Tuple[str, InlineKeyboardMarkup]:
@@ -227,7 +227,7 @@ def get_conversation_limit_message() -> Tuple[str, InlineKeyboardMarkup]:
         "✅ Better memory\n"
         "✅ NSFW mode\n"
         "✅ AI images\n\n"
-        "🎁 Try FREE for 3 days!"
+        "🎁 Try FREE for 3 days\\!"
     )
     
     keyboard = [

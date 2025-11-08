@@ -682,7 +682,7 @@ def create_bot(token: str):
         nsfw = user_mode in ["NSFW", "SPICY"]
 
         # Show generating message
-        await update.message.reply_text("🎨 *Generating your image...*\n\nThis may take 30-60 seconds. 💜", parse_mode="MarkdownV2")
+        await update.message.reply_text("🎨 *Generating your image\\.\\.\\.*\n\nThis may take 30\\-60 seconds\\. 💜", parse_mode="MarkdownV2")
 
         try:
             # Show upload_photo action
@@ -1210,7 +1210,7 @@ def create_bot(token: str):
                     caption = f"💜 Luna wearing {outfit_name.replace('_', ' ')}"
 
                 else:
-                    await query.edit_message_text("❌ Invalid generation type")
+                    await query.edit_message_text(escape_md("❌ Invalid generation type"), parse_mode="MarkdownV2")
                     return
 
                 # Deduct image credit/usage
