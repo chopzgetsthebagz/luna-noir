@@ -1379,75 +1379,130 @@ def create_bot(token: str):
         elif data.startswith("subscribe:"):
             plan = data.split(":")[1]  # basic, vip, ultimate
 
-            try:
-                import stripe
-                stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
-                price_id = PLANS[plan]["stripe_price_id"]
-                success_url = os.getenv("SUCCESS_URL", "https://t.me/Lunanoircompanionbot")
-                cancel_url = os.getenv("CANCEL_URL", "https://t.me/Lunanoircompanionbot")
+            # TEMPORARY: Activate plan for free (testing mode until Stripe is set up)
+            # TODO: Replace with actual Stripe checkout when ready
+            plan_name = PLANS[plan]["name"]
+            plan_price = PLANS[plan]["price"]
 
-                session = stripe.checkout.Session.create(
-                    mode="subscription",
-                    line_items=[{"price": price_id, "quantity": 1}],
-                    success_url=success_url,
-                    cancel_url=cancel_url,
-                    metadata={"telegram_user_id": str(user_id), "plan": plan}
-                )
+            # Activate the plan for free (testing)
+            set_user_plan(user_id, plan)
 
-                plan_name = PLANS[plan]["name"]
-                plan_price = PLANS[plan]["price"]
-                msg = (
-                    f"💎 *Subscribe to {plan_name}*\n\n"
-                    f"Price: {plan_price}\n\n"
-                    f"[Click here to complete payment]({session.url})\n\n"
-                    f"After payment, you'll have instant access!"
-                )
-                await query.edit_message_text(
-                    escape_md(msg),
-                    parse_mode="MarkdownV2",
-                    disable_web_page_preview=True
-                )
-            except Exception as e:
-                logger.exception(f"Failed to create checkout session: {e}")
-                await query.edit_message_text("❌ Failed to create checkout session. Please try /upgrade command.")
+            msg = (
+                f"✅ *Testing Mode: {plan_name} Activated\\!*\n\n"
+                f"You now have access to:\n"
+            )
+
+            # Add plan features
+            if plan == "basic":
+                msg += "• 20 AI images/month\n• NSFW mode\n• Voice messages\n• Priority support"
+            elif plan == "vip":
+                msg += "• UNLIMITED AI images\n• Custom outfits\n• VIP scenes\n• Extended memory\n• Early access"
+            elif plan == "ultimate":
+                msg += "• EVERYTHING UNLIMITED\n• Custom requests\n• Exclusive content\n• Max memory\n• VIP support"
+
+            msg += (
+                f"\n\n💡 *Note:* Stripe payment is not set up yet\\. "
+                f"In production, this would charge {plan_price}/month\\.\n\n"
+                f"Try generating images now\\!"
+            )
+
+            await query.edit_message_text(msg, parse_mode="MarkdownV2")
             return
+
+            # ORIGINAL STRIPE CODE (commented out for now):
+            # try:
+            #     import stripe
+            #     stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+            #     price_id = PLANS[plan]["stripe_price_id"]
+            #     success_url = os.getenv("SUCCESS_URL", "https://t.me/Lunanoircompanionbot")
+            #     cancel_url = os.getenv("CANCEL_URL", "https://t.me/Lunanoircompanionbot")
+
+            #     session = stripe.checkout.Session.create(
+            #         mode="subscription",
+            #         line_items=[{"price": price_id, "quantity": 1}],
+            #         success_url=success_url,
+            #         cancel_url=cancel_url,
+            #         metadata={"telegram_user_id": str(user_id), "plan": plan}
+            #     )
+
+            #     plan_name = PLANS[plan]["name"]
+            #     plan_price = PLANS[plan]["price"]
+            #     msg = (
+            #         f"💎 *Subscribe to {plan_name}*\n\n"
+            #         f"Price: {plan_price}\n\n"
+            #         f"[Click here to complete payment]({session.url})\n\n"
+            #         f"After payment, you'll have instant access!"
+            #     )
+            #     await query.edit_message_text(
+            #         escape_md(msg),
+            #         parse_mode="MarkdownV2",
+            #         disable_web_page_preview=True
+            #     )
+            # except Exception as e:
+            #     logger.exception(f"Failed to create checkout session: {e}")
+            #     await query.edit_message_text("❌ Failed to create checkout session. Please try /upgrade command.")
+            # return
 
         # Handle credit pack purchase
         elif data.startswith("buy_credits:"):
             pack = data.split(":")[1]  # 5_pack, 20_pack, 50_pack
 
-            try:
-                import stripe
-                stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
-                pack_info = IMAGE_CREDIT_PRICES[pack]
-                price_id = pack_info["stripe_price_id"]
-                success_url = os.getenv("SUCCESS_URL", "https://t.me/Lunanoircompanionbot")
-                cancel_url = os.getenv("CANCEL_URL", "https://t.me/Lunanoircompanionbot")
+            # TEMPORARY: Give free credits for testing (until Stripe is set up)
+            # TODO: Replace with actual Stripe checkout when ready
+            pack_info = IMAGE_CREDIT_PRICES[pack]
+            credits = pack_info["credits"]
+            bonus = pack_info.get("bonus", 0)
+            total = credits + bonus
 
-                session = stripe.checkout.Session.create(
-                    mode="payment",
-                    line_items=[{"price": price_id, "quantity": 1}],
-                    success_url=success_url,
-                    cancel_url=cancel_url,
-                    metadata={"telegram_user_id": str(user_id), "pack": pack}
-                )
+            # Give credits for free (testing mode)
+            add_image_credits(user_id, total)
 
-                credits = pack_info["credits"]
-                bonus = pack_info.get("bonus", 0)
-                total = credits + bonus
-                price = pack_info["price"]
+            msg = (
+                f"✅ *Testing Mode: Free Credits Added\\!*\n\n"
+                f"You received: {total} image credits\n\n"
+                f"💡 *Note:* Stripe payment is not set up yet\\. "
+                f"In production, this would charge ${pack_info['price']}\\.\n\n"
+                f"Try generating images now\\!"
+            )
+            await query.edit_message_text(
+                msg,
+                parse_mode="MarkdownV2"
+            )
+            return
 
-                msg = (
-                    f"🎫 *Buy {credits} Image Credits*\n\n"
-                    f"Price: {price}\n"
-                    f"You'll get: {total} images{' (includes ' + str(bonus) + ' bonus!)' if bonus else ''}\n\n"
-                    f"[Click here to complete payment]({session.url})"
-                )
-                await query.edit_message_text(
-                    escape_md(msg),
-                    parse_mode="MarkdownV2",
-                    disable_web_page_preview=True
-                )
+            # ORIGINAL STRIPE CODE (commented out for now):
+            # try:
+            #     import stripe
+            #     stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+            #     pack_info = IMAGE_CREDIT_PRICES[pack]
+            #     price_id = pack_info["stripe_price_id"]
+            #     success_url = os.getenv("SUCCESS_URL", "https://t.me/Lunanoircompanionbot")
+            #     cancel_url = os.getenv("CANCEL_URL", "https://t.me/Lunanoircompanionbot")
+
+            #     session = stripe.checkout.Session.create(
+            #         mode="payment",
+            #         line_items=[{"price": price_id, "quantity": 1}],
+            #         success_url=success_url,
+            #         cancel_url=cancel_url,
+            #         metadata={"telegram_user_id": str(user_id), "pack": pack}
+            #     )
+
+            #     credits = pack_info["credits"]
+            #     bonus = pack_info.get("bonus", 0)
+            #     total = credits + bonus
+            #     price = pack_info["price"]
+
+            #     msg = (
+            #         f"🎫 *Buy {credits} Image Credits*\n\n"
+            #         f"Price: {price}\n"
+            #         f"You'll get: {total} images{' (includes ' + str(bonus) + ' bonus!)' if bonus else ''}\n\n"
+            #         f"[Click here to complete payment]({session.url})"
+            #     )
+            #     await query.edit_message_text(
+            #         escape_md(msg),
+            #         parse_mode="MarkdownV2",
+            #         disable_web_page_preview=True
+            #     )
             except Exception as e:
                 logger.exception(f"Failed to create checkout session: {e}")
                 await query.edit_message_text("❌ Failed to create checkout session. Please try again.")
