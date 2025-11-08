@@ -438,14 +438,14 @@ def create_bot(token: str):
         premium_badge = "✅" if premium else "❌"
         msg = (
             f"🖤 *Luna Noir* ✨\n\n"
-            f"Hey there! I'm Luna, your AI companion. 💜\n\n"
+            f"Hey there\\! I'm Luna, your AI companion\\. 💜\n\n"
             f"*Current Status:*\n"
             f"Mode: *{current_mode}*\n"
             f"Premium: {premium_badge}\n\n"
-            f"Use the buttons below to explore what I can do!"
+            f"Use the buttons below to explore what I can do\\!"
         )
         await update.message.reply_text(
-            escape_md(msg),
+            msg,
             parse_mode="MarkdownV2",
             reply_markup=reply_markup
         )
@@ -516,7 +516,7 @@ def create_bot(token: str):
             f"Choose an option below:"
         )
         await update.message.reply_text(
-            escape_md(msg),
+            msg,
             parse_mode="MarkdownV2",
             reply_markup=reply_markup
         )
