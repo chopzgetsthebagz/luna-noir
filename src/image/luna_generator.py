@@ -148,6 +148,14 @@ def generate_luna_scenario(scenario_type: str, nsfw: bool = False, outfit: str =
             "sfw": "artistic portrait, shoulders visible, tasteful composition",
             "nsfw": "topless photo, bare breasts exposed, hands covering nipples, seductive expression, bedroom with purple neon lights, explicit topless photography, erotic art, NSFW content"
         },
+        "fullbody": {
+            "sfw": "full body portrait, standing confidently, entire body visible from head to toe, wearing black crop top and jeans, purple neon background, professional photoshoot lighting, full length shot",
+            "nsfw": "full body nude portrait, standing pose, completely naked, entire body visible from head to toe, bare breasts and pussy exposed, confident seductive stance, hands on hips, bedroom with purple neon lights, explicit full body nude photography, uncensored, NSFW full frontal nudity"
+        },
+        "nude": {
+            "sfw": "artistic silhouette, tasteful shadows, implied nudity",
+            "nsfw": "completely nude full frontal, standing naked, bare breasts and pussy fully visible, legs slightly apart, hands at sides, confident nude pose, bedroom with soft purple lighting, explicit nude photography, uncensored full nudity, erotic art, NSFW adult content, visible nipples and genitals"
+        },
         "lingerie": {
             "sfw": "fashion photoshoot, stylish black outfit",
             "nsfw": "full body lingerie photoshoot, wearing sheer black lace bra and panties set, garter belt and stockings, standing pose showing full body, bedroom setting with purple lights, explicit lingerie modeling, visible through sheer fabric, erotic fashion photography"

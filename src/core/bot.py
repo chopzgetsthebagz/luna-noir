@@ -892,19 +892,22 @@ def create_bot(token: str):
                         InlineKeyboardButton("😈 Seductive Selfie", callback_data="gen_selfie_seductive")
                     ],
                     [
-                        InlineKeyboardButton("🛏️ Bedroom Scene", callback_data="gen_scene_bedroom"),
+                        InlineKeyboardButton("🧍‍♀️ Full Body Shot", callback_data="gen_scene_fullbody"),
                         InlineKeyboardButton("🪞 Mirror Selfie", callback_data="gen_scene_mirror")
                     ],
                     [
-                        InlineKeyboardButton("🚿 Shower Scene", callback_data="gen_scene_shower"),
-                        InlineKeyboardButton("🎮 Gaming Scene", callback_data="gen_scene_gaming")
+                        InlineKeyboardButton("🛏️ Bedroom Scene", callback_data="gen_scene_bedroom"),
+                        InlineKeyboardButton("🚿 Shower Scene", callback_data="gen_scene_shower")
                     ],
                     [
                         InlineKeyboardButton("👙 Lingerie Photo", callback_data="gen_scene_lingerie"),
                         InlineKeyboardButton("🔥 Topless Photo", callback_data="gen_scene_topless")
                     ],
                     [
-                        InlineKeyboardButton("👗 Choose Outfit", callback_data="menu_outfits"),
+                        InlineKeyboardButton("🔞 Nude Photo", callback_data="gen_scene_nude"),
+                        InlineKeyboardButton("👗 Choose Outfit", callback_data="menu_outfits")
+                    ],
+                    [
                         InlineKeyboardButton("« Back", callback_data="menu_main")
                     ]
                 ]
@@ -1084,6 +1087,9 @@ def create_bot(token: str):
                     [
                         InlineKeyboardButton("⛓️ Leather", callback_data="gen_outfit_leather"),
                         InlineKeyboardButton("🔥 Topless", callback_data="gen_outfit_topless")
+                    ],
+                    [
+                        InlineKeyboardButton("🔞 Completely Nude", callback_data="gen_outfit_nude")
                     ],
                     [InlineKeyboardButton("« Back", callback_data="menu_generate")]
                 ]
