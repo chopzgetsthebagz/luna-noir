@@ -1091,7 +1091,7 @@ def create_bot(token: str):
             user_mode = get_user_mode(user_id)
             nsfw = user_mode in ["NSFW", "SPICY"]
 
-            await query.edit_message_text("🎨 *Generating your image...*\n\nThis may take 30-60 seconds. 💜", parse_mode="MarkdownV2")
+            await query.edit_message_text("🎨 *Generating your image\\.\\.\\.*\n\nThis may take 30\\-60 seconds\\. 💜", parse_mode="MarkdownV2")
 
             try:
                 # Generate image
@@ -1113,11 +1113,11 @@ def create_bot(token: str):
                 )
 
                 # Update message
-                await query.edit_message_text("✅ *Image generated!* Check above. 💜", parse_mode="MarkdownV2")
+                await query.edit_message_text("✅ *Image generated\\!* Check above\\. 💜", parse_mode="MarkdownV2")
 
             except Exception as e:
                 logger.exception(f"Image generation failed: {e}")
-                await query.edit_message_text("⚠️ *Image generation failed.*\n\nPlease try again.", parse_mode="MarkdownV2")
+                await query.edit_message_text("⚠️ *Image generation failed\\.*\n\nPlease try again\\.", parse_mode="MarkdownV2")
 
         # Handle voice toggle
         elif data == "voice_toggle":
