@@ -38,36 +38,38 @@ def query_llm(prompt: str, max_tokens: int = 512, system_prompt: str = None) -> 
         messages.append({"role": "system", "content": system_prompt})
     messages.append({"role": "user", "content": prompt})
     
-    # Request body
+    # Request body - OPTIMIZED FOR SPEED
     body = {
         "model": MODEL,
         "messages": messages,
-        "max_tokens": max_tokens,
+        "max_tokens": min(max_tokens, 200),  # Cap at 200 for faster responses
         "temperature": 0.8,
-        "stream": False
+        "stream": False,
+        "top_p": 0.9  # Nucleus sampling for faster generation
     }
     
     try:
         logger.info(f"Querying LLM at {BASE} with model {MODEL}")
+        # OPTIMIZED: Reduced timeout for faster responses
         r = requests.post(
             f"{BASE}/chat/completions",
             json=body,
             headers=headers,
-            timeout=60
+            timeout=15  # Reduced from 60 to 15 seconds
         )
         r.raise_for_status()
         data = r.json()
-        
+
         # Extract response
         content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
-        
+
         if not content:
             logger.warning(f"Empty response from LLM: {data}")
             return "I'm having trouble thinking right now. Try again?"
-        
+
         logger.info(f"LLM response received ({len(content)} chars)")
         return content
-        
+
     except requests.exceptions.Timeout:
         logger.error("LLM request timed out")
         return "I'm thinking too slowly right now. Try again in a moment?"

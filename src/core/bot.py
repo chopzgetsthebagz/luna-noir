@@ -312,7 +312,7 @@ def _call_openrouter(messages: List[Dict[str, str]]) -> str:
 
 
 def _call_groq(messages: List[Dict[str, str]]) -> str:
-    """Call Groq API"""
+    """Call Groq API - OPTIMIZED FOR SPEED"""
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {GROQ_API_KEY}",
@@ -321,10 +321,13 @@ def _call_groq(messages: List[Dict[str, str]]) -> str:
     body = {
         "model": GROQ_MODEL,
         "messages": messages,
-        "temperature": 0.7
+        "temperature": 0.8,  # Slightly higher for more natural responses
+        "max_tokens": 200,   # Limit response length for faster generation
+        "top_p": 0.9         # Nucleus sampling for faster, focused responses
     }
     try:
-        r = requests.post(url, headers=headers, json=body, timeout=45)
+        # Reduced timeout for faster failure/retry
+        r = requests.post(url, headers=headers, json=body, timeout=15)
         r.raise_for_status()
         return r.json()["choices"][0]["message"]["content"].strip()
     except requests.exceptions.HTTPError as e:
@@ -358,10 +361,10 @@ def _call_open_llm(messages: List[Dict[str, str]]) -> str:
                 context_parts.append(f"Assistant: {msg['content']}")
         user_content = "\n".join(context_parts[-10:])  # Last 10 exchanges
 
-    # Query the LLM
+    # Query the LLM - OPTIMIZED FOR SPEED
     raw_response = query_llm(
         prompt=user_content,
-        max_tokens=512,
+        max_tokens=200,  # Reduced for faster responses
         system_prompt=system_prompt
     )
 
@@ -1589,12 +1592,12 @@ def create_bot(token: str):
             "content": system_content
         }
 
-        # Load persistent memory
+        # Load persistent memory - OPTIMIZED FOR SPEED
         convo = _load_memory(chat_id)
         if premium:
-            convo = convo[-16:]  # Premium: Keep last 16 messages (8 turns)
+            convo = convo[-8:]  # Premium: Keep last 8 messages (4 turns) - faster processing
         else:
-            convo = convo[-4:]   # Free: Keep last 4 messages (2 turns)
+            convo = convo[-2:]   # Free: Keep last 2 messages (1 turn) - fastest
 
         # Build message list
         msgs = [system_msg] + convo + [{"role": "user", "content": text}]
