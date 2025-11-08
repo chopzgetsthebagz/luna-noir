@@ -38,24 +38,24 @@ def query_llm(prompt: str, max_tokens: int = 512, system_prompt: str = None) -> 
         messages.append({"role": "system", "content": system_prompt})
     messages.append({"role": "user", "content": prompt})
     
-    # Request body - OPTIMIZED FOR SPEED
+    # Request body - BALANCED FOR QUALITY & SPEED
     body = {
         "model": MODEL,
         "messages": messages,
-        "max_tokens": min(max_tokens, 200),  # Cap at 200 for faster responses
-        "temperature": 0.8,
+        "max_tokens": min(max_tokens, 400),  # Increased for more thoughtful responses
+        "temperature": 0.85,  # Slightly higher for more creative responses
         "stream": False,
-        "top_p": 0.9  # Nucleus sampling for faster generation
+        "top_p": 0.92  # Balanced sampling for quality
     }
-    
+
     try:
         logger.info(f"Querying LLM at {BASE} with model {MODEL}")
-        # OPTIMIZED: Reduced timeout for faster responses
+        # Balanced timeout for thoughtful responses
         r = requests.post(
             f"{BASE}/chat/completions",
             json=body,
             headers=headers,
-            timeout=15  # Reduced from 60 to 15 seconds
+            timeout=30  # Increased for longer, better responses
         )
         r.raise_for_status()
         data = r.json()

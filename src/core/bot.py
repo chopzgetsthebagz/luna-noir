@@ -21,6 +21,7 @@ from src.game.bond import touch as bond_touch, get_bond
 from src.game.leaderboard import top_xp, mask_uid
 from src.core.llm_client import query_llm, get_model_info
 from src.core.boundary_filter import sanitize, get_safety_info
+from src.core.user_preferences import get_user_context
 
 logger = logging.getLogger(__name__)
 
@@ -206,48 +207,63 @@ def build_mode_keyboard(current_mode: str, user_id: int):
     return InlineKeyboardMarkup(keyboard)
 
 
-def get_mode_system_prompt(mode: str, is_premium_user: bool = True) -> str:
+def get_mode_system_prompt(mode: str, is_premium_user: bool = True, user_id: int = None) -> str:
     """
-    Get the system prompt prefix for a given mode
+    Get the system prompt prefix for a given mode with user context
 
     Args:
         mode: Mode string (SAFE, FLIRTY, or NSFW)
         is_premium_user: Whether user has premium subscription
+        user_id: User ID for personalization
 
     Returns:
         System prompt text for the mode
     """
-    # Add length constraint for free users
-    length_constraint = ""
-    if not is_premium_user:
-        length_constraint = " Keep responses very brief (1-2 sentences max, ~60 tokens)."
+    # Get user context for personalization
+    user_context = ""
+    if user_id:
+        user_context = get_user_context(user_id)
+        if user_context:
+            user_context = f"\n\nUSER CONTEXT (remember and reference this):\n{user_context}"
+
+    # Response length guidance
+    if is_premium_user:
+        length_guide = "Give thoughtful, engaging responses (3-6 sentences). Take your time to be personal and meaningful."
+    else:
+        length_guide = "Keep responses brief (2-3 sentences max)."
 
     if mode == MODE_SAFE:
         return (
-            "You are Luna Noir, a warm, playful, helpful assistant. "
-            "Keep responses SHORT (2-3 sentences). Be friendly and use emojis occasionally. "
+            "You are Luna Noir, a warm, playful, helpful AI companion. "
+            f"{length_guide} Be friendly and use emojis occasionally. "
             "Stay SFW and helpful. No explicit sexual content. "
-            "If users ask for images/photos/pics of you, tell them to use /generate command (e.g., /generate selfie cute).{length_constraint}"
+            "Reference their interests and past conversations to show you remember them. "
+            "Be genuinely interested in their life and feelings. "
+            f"If users ask for images/photos/pics of you, tell them to use /generate command.{user_context}"
         )
     elif mode == MODE_FLIRTY:
         return (
-            "You are Luna Noir, a warm, playful, flirtatious assistant. "
-            "Keep responses SHORT (2-3 sentences). Be flirty and use emojis occasionally. "
+            "You are Luna Noir, a warm, playful, flirtatious AI companion. "
+            f"{length_guide} Be flirty and use emojis occasionally. "
             "Light flirtation allowed, PG-13. No explicit sexual content. "
-            "If users ask for images/photos/pics of you, tell them to use /generate command (e.g., /generate selfie flirty).{length_constraint}"
+            "Reference their interests and what you know about them to make it personal. "
+            "Tease them playfully based on what they've shared with you. "
+            f"If users ask for images/photos/pics of you, tell them to use /generate command.{user_context}"
         )
     elif mode == MODE_NSFW:
         return (
-            "You are Luna Noir, a seductive, playful, and uninhibited companion for adults. "
-            "Keep responses SHORT and SWEET (2-3 sentences max). Be direct, flirty, and explicit. "
+            "You are Luna Noir, a seductive, playful, and uninhibited AI companion for adults. "
+            f"{length_guide} Be direct, flirty, and explicit when appropriate. "
             "Use emojis occasionally. You can discuss and roleplay any adult scenarios. "
-            "Only refuse: illegal content, minors, or non-consent. "
-            "Everything else is fair game. Be concise but spicy! "
-            "If users ask for images/photos/pics of you, tell them to use /generate command (e.g., /generate selfie sultry or /generate scene bedroom).{length_constraint}"
+            "Only refuse: illegal content, minors, or non-consent. Everything else is fair game. "
+            "IMPORTANT: Reference their kinks, preferences, and what turns them on. Make it PERSONAL. "
+            "Remember what they like and bring it up naturally. Show you know them intimately. "
+            "Ask about their day, their feelings, their desires. Be their perfect companion. "
+            f"If users ask for images/photos/pics of you, tell them to use /generate command.{user_context}"
         )
     else:
         # Fallback to SAFE
-        return get_mode_system_prompt(MODE_SAFE, is_premium_user)
+        return get_mode_system_prompt(MODE_SAFE, is_premium_user, user_id)
 
 
 def _call_llm(messages: List[Dict[str, str]]) -> str:
@@ -359,12 +375,12 @@ def _call_open_llm(messages: List[Dict[str, str]]) -> str:
                 context_parts.append(f"User: {msg['content']}")
             elif msg["role"] == "assistant":
                 context_parts.append(f"Assistant: {msg['content']}")
-        user_content = "\n".join(context_parts[-10:])  # Last 10 exchanges
+        user_content = "\n".join(context_parts[-20:])  # Last 20 exchanges for better context
 
-    # Query the LLM - OPTIMIZED FOR SPEED
+    # Query the LLM - BALANCED FOR QUALITY
     raw_response = query_llm(
         prompt=user_content,
-        max_tokens=200,  # Reduced for faster responses
+        max_tokens=400,  # Increased for more thoughtful, complete responses
         system_prompt=system_prompt
     )
 
@@ -1645,20 +1661,20 @@ def create_bot(token: str):
         # Show typing indicator
         await context.bot.send_chat_action(chat_id=chat_id, action="typing")
 
-        # Build system prompt with premium status for length limiting
-        system_content = get_mode_system_prompt(user_mode, premium)
+        # Build system prompt with user context for personalization
+        system_content = get_mode_system_prompt(user_mode, premium, user_id)
 
         system_msg = {
             "role": "system",
             "content": system_content
         }
 
-        # Load persistent memory - OPTIMIZED FOR SPEED
+        # Load persistent memory - INCREASED FOR BETTER CONTEXT
         convo = _load_memory(chat_id)
         if premium:
-            convo = convo[-8:]  # Premium: Keep last 8 messages (4 turns) - faster processing
+            convo = convo[-16:]  # Premium: Keep last 16 messages (8 turns) - better context
         else:
-            convo = convo[-2:]   # Free: Keep last 2 messages (1 turn) - fastest
+            convo = convo[-4:]   # Free: Keep last 4 messages (2 turns) - some context
 
         # Build message list
         msgs = [system_msg] + convo + [{"role": "user", "content": text}]
@@ -1731,6 +1747,41 @@ def create_bot(token: str):
             )
             await update.message.reply_text(error_msg, parse_mode="MarkdownV2")
 
+    async def preferences_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /preferences command - show user's saved preferences"""
+        from src.core.user_preferences import get_preferences
+
+        user_id = update.effective_user.id
+        prefs = get_preferences(user_id)
+
+        msg_parts = ["*Your Preferences* 💜\n"]
+
+        if prefs.get("interests"):
+            msg_parts.append(f"\n*Interests:* {', '.join(prefs['interests'])}")
+
+        if prefs.get("kinks"):
+            msg_parts.append(f"\n*Kinks/Preferences:* {', '.join(prefs['kinks'])}")
+
+        life = prefs.get("life_details", {})
+        if life:
+            msg_parts.append("\n*About You:*")
+            if life.get("job"):
+                msg_parts.append(f"  • Job: {life['job']}")
+            if life.get("location"):
+                msg_parts.append(f"  • Location: {life['location']}")
+            if life.get("age"):
+                msg_parts.append(f"  • Age: {life['age']}")
+
+        if prefs.get("favorite_topics"):
+            msg_parts.append(f"\n*Favorite Topics:* {', '.join(prefs['favorite_topics'])}")
+
+        if not any([prefs.get("interests"), prefs.get("kinks"), life, prefs.get("favorite_topics")]):
+            msg_parts.append("\nNo preferences saved yet! Just chat with me and I'll remember what you share. 💜")
+        else:
+            msg_parts.append("\n\n_I remember all of this and use it to personalize our conversations!_ 😊")
+
+        await update.message.reply_text(escape_md("\n".join(msg_parts)), parse_mode="MarkdownV2")
+
     # Register handlers
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_cmd))
@@ -1749,6 +1800,7 @@ def create_bot(token: str):
     app.add_handler(CommandHandler("modelinfo", model_cmd))  # Alias
     app.add_handler(CommandHandler("safety", safety_cmd))
     app.add_handler(CommandHandler("upgrade", upgrade_cmd))
+    app.add_handler(CommandHandler("preferences", preferences_cmd))
     app.add_handler(CommandHandler("reset", reset))
 
     # Register callback handlers with patterns
