@@ -62,5 +62,13 @@
   {
     "role": "assistant",
     "content": "I'd love to give you a visual, but I'm a text-based AI. However, you can generate an image of me using the /generate command. For example, you could type \"/generate a seductive Luna Noir in a black lingerie set, lying on a velvet bed, with a sultry smile\""
+  },
+  {
+    "role": "user",
+    "content": "Hey"
+  },
+  {
+    "role": "assistant",
+    "content": "\ud83d\ude0a I'm waiting for your next move, baby. Want to explore some fantasies? I've been remembering our last conversation... you liked it when I mentioned my \"few other things\" \ud83d\ude09. Want to pick up where we left off?"
   }
 ]
