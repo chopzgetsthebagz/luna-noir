@@ -403,13 +403,13 @@ def create_bot(token: str):
     Returns:
         Telegram Application instance
     """
-    from telegram import Update
+    from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
     from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
 
     app = ApplicationBuilder().token(token).build()
 
     async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Handle /start command - show current mode and mode selector"""
+        """Handle /start command - show welcome message with main menu"""
         user_id = update.effective_user.id
         chat_id = update.effective_chat.id
 
@@ -417,19 +417,37 @@ def create_bot(token: str):
 
         current_mode = get_user_mode(user_id)
         premium = is_premium(user_id)
-        keyboard = build_mode_keyboard(current_mode, user_id)
+
+        # Build main menu keyboard
+        keyboard = [
+            [
+                InlineKeyboardButton("📸 Generate Image", callback_data="menu_generate"),
+                InlineKeyboardButton("🎧 Voice Settings", callback_data="menu_voice")
+            ],
+            [
+                InlineKeyboardButton("🎮 Profile & XP", callback_data="menu_profile"),
+                InlineKeyboardButton("🎯 Change Mode", callback_data="menu_mode")
+            ],
+            [
+                InlineKeyboardButton("💎 Premium", callback_data="menu_premium"),
+                InlineKeyboardButton("❓ Help", callback_data="menu_help")
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
 
         premium_badge = "✅" if premium else "❌"
         msg = (
-            f"🖤 *Luna Noir online* ✨\n\n"
-            f"Current mode: *{current_mode}*\n"
+            f"🖤 *Luna Noir* ✨\n\n"
+            f"Hey there! I'm Luna, your AI companion. 💜\n\n"
+            f"*Current Status:*\n"
+            f"Mode: *{current_mode}*\n"
             f"Premium: {premium_badge}\n\n"
-            f"Tap a button below to change mode, or send /help for commands."
+            f"Use the buttons below to explore what I can do!"
         )
         await update.message.reply_text(
             escape_md(msg),
             parse_mode="MarkdownV2",
-            reply_markup=keyboard
+            reply_markup=reply_markup
         )
 
     async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -468,16 +486,40 @@ def create_bot(token: str):
         await update.message.reply_text(escape_md(help_text), parse_mode="MarkdownV2")
 
     async def menu_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Handle /menu command"""
-        menu_text = (
-            "*Quick Actions*\n\n"
-            "• Tell me a joke\n"
-            "• Summarize my last message\n"
-            "• Brainstorm 3 ideas\n"
-            "• Explain something complex\n"
-            "• Help me write something"
+        """Handle /menu command - show main menu with buttons"""
+        user_id = update.effective_user.id
+        current_mode = get_user_mode(user_id)
+        premium = is_premium(user_id)
+
+        # Build main menu keyboard
+        keyboard = [
+            [
+                InlineKeyboardButton("📸 Generate Image", callback_data="menu_generate"),
+                InlineKeyboardButton("🎧 Voice Settings", callback_data="menu_voice")
+            ],
+            [
+                InlineKeyboardButton("🎮 Profile & XP", callback_data="menu_profile"),
+                InlineKeyboardButton("🎯 Change Mode", callback_data="menu_mode")
+            ],
+            [
+                InlineKeyboardButton("💎 Premium", callback_data="menu_premium"),
+                InlineKeyboardButton("❓ Help", callback_data="menu_help")
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        premium_badge = "✅" if premium else "❌"
+        msg = (
+            f"*Luna's Menu* 💜\n\n"
+            f"Mode: *{current_mode}*\n"
+            f"Premium: {premium_badge}\n\n"
+            f"Choose an option below:"
         )
-        await update.message.reply_text(escape_md(menu_text), parse_mode="MarkdownV2")
+        await update.message.reply_text(
+            escape_md(msg),
+            parse_mode="MarkdownV2",
+            reply_markup=reply_markup
+        )
 
     async def model_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /model and /modelinfo commands to show current LLM provider"""
@@ -825,6 +867,342 @@ def create_bot(token: str):
             logger.exception("Error fetching stats")
             await update.message.reply_text(f"❌ Error fetching stats: {str(e)}")
 
+    async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle inline button callbacks for main menu"""
+        query = update.callback_query
+        user_id = update.effective_user.id
+        data = query.data
+
+        await query.answer()
+
+        # Handle menu navigation
+        if data == "menu_generate":
+            # Show image generation options
+            keyboard = [
+                [
+                    InlineKeyboardButton("😏 Sultry Selfie", callback_data="gen_selfie_sultry"),
+                    InlineKeyboardButton("😘 Flirty Selfie", callback_data="gen_selfie_flirty")
+                ],
+                [
+                    InlineKeyboardButton("😈 Seductive Selfie", callback_data="gen_selfie_seductive"),
+                    InlineKeyboardButton("😊 Cute Selfie", callback_data="gen_selfie_cute")
+                ],
+                [
+                    InlineKeyboardButton("🛏️ Bedroom Scene", callback_data="gen_scene_bedroom"),
+                    InlineKeyboardButton("🎮 Gaming Scene", callback_data="gen_scene_gaming")
+                ],
+                [
+                    InlineKeyboardButton("🪞 Mirror Selfie", callback_data="gen_scene_mirror"),
+                    InlineKeyboardButton("🚿 Shower Scene", callback_data="gen_scene_shower")
+                ],
+                [InlineKeyboardButton("« Back to Menu", callback_data="menu_main")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            premium = is_premium(user_id)
+            if not premium:
+                msg = "🔒 *Image Generation* (Premium Only)\n\nUpgrade to generate AI photos of me! 💜\n\nUse /upgrade to unlock."
+            else:
+                user_mode = get_user_mode(user_id)
+                nsfw_note = " (NSFW enabled)" if user_mode in ["NSFW", "SPICY"] else " (SFW mode)"
+                msg = f"📸 *Generate Luna Images*{nsfw_note}\n\nChoose a style below:"
+
+            await query.edit_message_text(
+                escape_md(msg),
+                parse_mode="MarkdownV2",
+                reply_markup=reply_markup
+            )
+
+        elif data == "menu_voice":
+            # Show voice options
+            voice_on = is_voice_on(user_id)
+            status = "ON 🎧" if voice_on else "OFF 🔇"
+
+            keyboard = [
+                [
+                    InlineKeyboardButton("🎧 Turn Voice ON" if not voice_on else "🔇 Turn Voice OFF",
+                                       callback_data="voice_toggle")
+                ],
+                [InlineKeyboardButton("« Back to Menu", callback_data="menu_main")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            msg = f"*Voice Settings*\n\nCurrent status: {status}\n\nI can send voice replies to your messages!"
+            await query.edit_message_text(
+                escape_md(msg),
+                parse_mode="MarkdownV2",
+                reply_markup=reply_markup
+            )
+
+        elif data == "menu_profile":
+            # Show profile info
+            profile = get_profile(user_id)
+            bond = get_bond(user_id)
+            tier = get_tier(user_id)
+
+            keyboard = [
+                [
+                    InlineKeyboardButton("🎁 Daily Reward", callback_data="action_daily"),
+                    InlineKeyboardButton("📜 Quests", callback_data="action_quests")
+                ],
+                [
+                    InlineKeyboardButton("🏆 Leaderboard", callback_data="action_leaderboard")
+                ],
+                [InlineKeyboardButton("« Back to Menu", callback_data="menu_main")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            tier_text = f" ({tier})" if tier else ""
+            msg = (
+                f"*🎮 Your Profile*\n\n"
+                f"Level: *{profile['level']}*{tier_text}\n"
+                f"XP: {profile['xp']}/{profile['need']}\n"
+                f"Bond: {bond['score']}/100 💕"
+            )
+            await query.edit_message_text(
+                escape_md(msg),
+                parse_mode="MarkdownV2",
+                reply_markup=reply_markup
+            )
+
+        elif data == "menu_mode":
+            # Show mode selector
+            current_mode = get_user_mode(user_id)
+            keyboard = build_mode_keyboard(current_mode, user_id)
+
+            msg = (
+                f"*🎯 Conversation Mode*\n\n"
+                f"Current: *{current_mode}*\n\n"
+                f"Choose your preferred mode:"
+            )
+            await query.edit_message_text(
+                escape_md(msg),
+                parse_mode="MarkdownV2",
+                reply_markup=keyboard
+            )
+
+        elif data == "menu_premium":
+            # Show premium info
+            premium = is_premium(user_id)
+
+            if premium:
+                keyboard = [[InlineKeyboardButton("« Back to Menu", callback_data="menu_main")]]
+                msg = "✅ *You have Premium!*\n\nEnjoy all features unlocked! 💎"
+            else:
+                keyboard = [
+                    [InlineKeyboardButton("💎 Upgrade Now", callback_data="upgrade")],
+                    [InlineKeyboardButton("« Back to Menu", callback_data="menu_main")]
+                ]
+                msg = (
+                    "*💎 Premium Features*\n\n"
+                    "✅ NSFW & FLIRTY modes\n"
+                    "✅ Longer conversations\n"
+                    "✅ Voice replies\n"
+                    "✅ AI-generated images\n"
+                    "✅ Priority support\n\n"
+                    "Tap below to upgrade!"
+                )
+
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.edit_message_text(
+                escape_md(msg),
+                parse_mode="MarkdownV2",
+                reply_markup=reply_markup
+            )
+
+        elif data == "menu_help":
+            # Show help
+            keyboard = [[InlineKeyboardButton("« Back to Menu", callback_data="menu_main")]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            msg = (
+                "*Luna Noir Commands*\n\n"
+                "*Quick Commands:*\n"
+                "/menu – show this menu\n"
+                "/generate – create images\n"
+                "/voice on/off – toggle voice\n"
+                "/mode – change mode\n"
+                "/profile – view stats\n"
+                "/daily – claim reward\n"
+                "/upgrade – get premium\n\n"
+                "Just chat with me naturally! 💜"
+            )
+            await query.edit_message_text(
+                escape_md(msg),
+                parse_mode="MarkdownV2",
+                reply_markup=reply_markup
+            )
+
+        elif data == "menu_main":
+            # Return to main menu
+            current_mode = get_user_mode(user_id)
+            premium = is_premium(user_id)
+
+            keyboard = [
+                [
+                    InlineKeyboardButton("📸 Generate Image", callback_data="menu_generate"),
+                    InlineKeyboardButton("🎧 Voice Settings", callback_data="menu_voice")
+                ],
+                [
+                    InlineKeyboardButton("🎮 Profile & XP", callback_data="menu_profile"),
+                    InlineKeyboardButton("🎯 Change Mode", callback_data="menu_mode")
+                ],
+                [
+                    InlineKeyboardButton("💎 Premium", callback_data="menu_premium"),
+                    InlineKeyboardButton("❓ Help", callback_data="menu_help")
+                ]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            premium_badge = "✅" if premium else "❌"
+            msg = (
+                f"*Luna's Menu* 💜\n\n"
+                f"Mode: *{current_mode}*\n"
+                f"Premium: {premium_badge}\n\n"
+                f"Choose an option below:"
+            )
+            await query.edit_message_text(
+                escape_md(msg),
+                parse_mode="MarkdownV2",
+                reply_markup=reply_markup
+            )
+
+    async def action_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle action button callbacks (generate, voice toggle, etc.)"""
+        query = update.callback_query
+        user_id = update.effective_user.id
+        chat_id = update.effective_chat.id
+        data = query.data
+
+        await query.answer()
+
+        # Handle image generation buttons
+        if data.startswith("gen_"):
+            premium = is_premium(user_id)
+            if not premium:
+                await query.answer("🔒 Premium only! Use /upgrade", show_alert=True)
+                return
+
+            # Parse generation type
+            parts = data.split("_")
+            gen_type = parts[1]  # selfie or scene
+            style = parts[2]     # sultry, bedroom, etc.
+
+            user_mode = get_user_mode(user_id)
+            nsfw = user_mode in ["NSFW", "SPICY"]
+
+            await query.edit_message_text("🎨 *Generating your image...*\n\nThis may take 30-60 seconds. 💜", parse_mode="MarkdownV2")
+
+            try:
+                # Generate image
+                if gen_type == "selfie":
+                    image_bytes = generate_luna_selfie(mood=style, nsfw=nsfw)
+                    caption = f"💜 Luna's {style} selfie"
+                elif gen_type == "scene":
+                    image_bytes = generate_luna_scenario(scenario_type=style, nsfw=nsfw)
+                    caption = f"💜 Luna in {style}"
+                else:
+                    await query.edit_message_text("❌ Invalid generation type")
+                    return
+
+                # Send the image
+                await context.bot.send_photo(
+                    chat_id=chat_id,
+                    photo=image_bytes,
+                    caption=caption
+                )
+
+                # Update message
+                await query.edit_message_text("✅ *Image generated!* Check above. 💜", parse_mode="MarkdownV2")
+
+            except Exception as e:
+                logger.exception(f"Image generation failed: {e}")
+                await query.edit_message_text("⚠️ *Image generation failed.*\n\nPlease try again.", parse_mode="MarkdownV2")
+
+        # Handle voice toggle
+        elif data == "voice_toggle":
+            current = is_voice_on(user_id)
+            set_voice(user_id, not current)
+            new_status = "ON 🎧" if not current else "OFF 🔇"
+
+            keyboard = [
+                [
+                    InlineKeyboardButton("🎧 Turn Voice ON" if current else "🔇 Turn Voice OFF",
+                                       callback_data="voice_toggle")
+                ],
+                [InlineKeyboardButton("« Back to Menu", callback_data="menu_main")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            msg = f"*Voice Settings*\n\nCurrent status: {new_status}\n\nI can send voice replies to your messages!"
+            await query.edit_message_text(
+                escape_md(msg),
+                parse_mode="MarkdownV2",
+                reply_markup=reply_markup
+            )
+
+        # Handle daily reward
+        elif data == "action_daily":
+            result = claim_daily(user_id)
+
+            if not result:
+                msg = "⏳ *Daily reward already claimed.*\n\nCome back in 24 hours!"
+            else:
+                msg = (
+                    f"✅ *Daily reward claimed!*\n\n"
+                    f"+20 XP\n"
+                    f"Level: {result['level']}\n"
+                    f"XP: {result['xp']}/{100 * result['level']}"
+                )
+
+            keyboard = [[InlineKeyboardButton("« Back to Profile", callback_data="menu_profile")]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            await query.edit_message_text(
+                escape_md(msg),
+                parse_mode="MarkdownV2",
+                reply_markup=reply_markup
+            )
+
+        # Handle quests
+        elif data == "action_quests":
+            quests = list_quests(user_id)
+
+            msg = "*📜 Available Quests*\n\n"
+            for q in quests:
+                status = "✅" if q["done"] else "⭕"
+                msg += f"{status} *{q['text']}* (+{q['xp']} XP)\n"
+                if not q["done"]:
+                    msg += f"   Use: /claim {q['id']}\n"
+                msg += "\n"
+
+            keyboard = [[InlineKeyboardButton("« Back to Profile", callback_data="menu_profile")]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            await query.edit_message_text(
+                escape_md(msg),
+                parse_mode="MarkdownV2",
+                reply_markup=reply_markup
+            )
+
+        # Handle leaderboard
+        elif data == "action_leaderboard":
+            top = top_xp(10)
+
+            msg = "*🏆 Top 10 Users*\n\n"
+            for i, entry in enumerate(top, 1):
+                uid_masked = mask_uid(entry["user_id"])
+                msg += f"{i}. User {uid_masked} – L{entry['level']} ({entry['xp']} XP)\n"
+
+            keyboard = [[InlineKeyboardButton("« Back to Profile", callback_data="menu_profile")]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            await query.edit_message_text(
+                escape_md(msg),
+                parse_mode="MarkdownV2",
+                reply_markup=reply_markup
+            )
+
     async def mode_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle inline button callbacks for mode selection and upgrade"""
         query = update.callback_query
@@ -1073,7 +1451,12 @@ def create_bot(token: str):
     app.add_handler(CommandHandler("safety", safety_cmd))
     app.add_handler(CommandHandler("upgrade", upgrade_cmd))
     app.add_handler(CommandHandler("reset", reset))
-    app.add_handler(CallbackQueryHandler(mode_callback))
+
+    # Register callback handlers with patterns
+    app.add_handler(CallbackQueryHandler(menu_callback, pattern="^menu_"))
+    app.add_handler(CallbackQueryHandler(action_callback, pattern="^(gen_|voice_toggle|action_)"))
+    app.add_handler(CallbackQueryHandler(mode_callback))  # Catch-all for mode changes
+
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text))
 
     logger.info(f"Bot initialized with {LLM_PROVIDER.upper()} integration")
