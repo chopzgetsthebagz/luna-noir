@@ -22,15 +22,15 @@ LUNA_BASE_DESCRIPTION = """adult woman Luna Noir exactly 22 years old, mature fe
 NEGATIVE_PROMPT = "child, teen, teenager, young girl, underage, baby face, multiple people, crowd, group, different hair color, blonde hair, brunette hair, long hair, curly hair, different eye color, brown eyes, blue eyes, green eyes, tan skin, dark skin, tanned, muscular, overweight, flat chest, elderly, old, anime, cartoon, 3d render, cropped head, cropped feet, cut off, partial body, deformed, ugly, blurry, low quality, multiple tattoos, face tattoos, chest tattoos, back tattoos, sleeve tattoos"
 
 
-def generate_luna_image(scenario: str, nsfw: bool = False, width: int = 1024, height: int = 1024, seed: int = None) -> bytes:
+def generate_luna_image(scenario: str, nsfw: bool = False, width: int = 1536, height: int = 1536, seed: int = None) -> bytes:
     """
     Generate an image of Luna in a specific scenario.
 
     Args:
         scenario: Description of the scene/pose/outfit (e.g., "lying on bed in lingerie")
         nsfw: Whether to allow NSFW content
-        width: Image width (default 1024)
-        height: Image height (default 1024)
+        width: Image width (default 1536 - high resolution)
+        height: Image height (default 1536 - high resolution)
         seed: Random seed for reproducibility (None = random)
 
     Returns:
@@ -39,20 +39,20 @@ def generate_luna_image(scenario: str, nsfw: bool = False, width: int = 1024, he
     Raises:
         requests.HTTPError: If API request fails
     """
-    # Adjust dimensions for full body shots - MUCH taller aspect ratio
+    # Adjust dimensions for full body shots - MUCH taller aspect ratio with HIGH RESOLUTION
     if "full body" in scenario.lower() or "head to toe" in scenario.lower() or "standing" in scenario.lower():
-        width = 640   # Narrower for full body portraits
-        height = 1536  # Much taller to ensure feet are visible
+        width = 1024   # Narrower for full body portraits (high res)
+        height = 2048  # Much taller to ensure feet are visible (high res)
         # Add explicit framing instruction
         scenario = f"full length portrait showing complete body from top of head to bottom of feet, {scenario}"
 
     # Build the full prompt with Luna's consistent features
     # Always emphasize adult woman to ensure mature appearance
     if nsfw:
-        # NSFW prompts - explicit but concise, emphasizing adult features
-        full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic photograph, detailed adult anatomy, natural skin texture, professional photography, studio lighting, NSFW explicit adult content, masterpiece, best quality, ultra detailed"
+        # NSFW prompts - explicit but concise, emphasizing adult features and HIGH QUALITY
+        full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic photograph, detailed adult anatomy, natural skin texture, professional photography, studio lighting, NSFW explicit adult content, masterpiece, best quality, ultra detailed, 8K resolution, sharp focus, high definition, crisp details"
     else:
-        full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic photograph, professional photography, studio lighting, masterpiece, best quality, ultra detailed"
+        full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic photograph, professional photography, studio lighting, masterpiece, best quality, ultra detailed, 8K resolution, sharp focus, high definition, crisp details"
 
     # URL encode the prompt
     encoded_prompt = quote(full_prompt)
@@ -61,7 +61,7 @@ def generate_luna_image(scenario: str, nsfw: bool = False, width: int = 1024, he
     # Seed 42 ensures Luna looks the same across all images
     seed_param = f"&seed={seed}" if seed is not None else "&seed=42"
 
-    # Build the API URL with parameters
+    # Build the API URL with parameters - HIGH RESOLUTION
     url = f"{POLLINATIONS_API}/{encoded_prompt}?width={width}&height={height}&model=flux&nologo=true&enhance=true{seed_param}"
 
     logger.info(f"Generating Luna image: {scenario[:50]}... (NSFW: {nsfw}, {width}x{height})")
