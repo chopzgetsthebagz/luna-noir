@@ -15,11 +15,11 @@ logger = logging.getLogger(__name__)
 POLLINATIONS_API = "https://image.pollinations.ai/prompt"
 
 # Luna's core character description - HIGHLY SPECIFIC for maximum consistency
-# Using exact same description every time to ensure same person
-LUNA_BASE_DESCRIPTION = """1girl Luna Noir, young adult woman age 22, shoulder-length lavender purple bob cut hair with blunt straight bangs covering forehead, bright violet eyes, very pale white skin, heart shaped face, thin black choker around neck, small simple black line art snake tattoo on right forearm, petite slim body type, 165cm tall"""
+# IMPORTANT: Luna is clearly an adult woman (22 years old)
+LUNA_BASE_DESCRIPTION = """adult woman Luna Noir age 22 years old, mature feminine features, shoulder-length lavender purple bob haircut with straight blunt bangs, bright violet purple eyes with dark eyeliner, very pale porcelain white skin, defined cheekbones, full lips with dark lipstick, thin black leather choker necklace, small black snake line tattoo on right forearm, slim petite feminine figure, small natural breasts, toned stomach, long legs, 165cm tall, goth aesthetic, confident mature expression"""
 
-# Negative prompt to avoid inconsistencies
-NEGATIVE_PROMPT = "multiple people, crowd, group, different hair, blonde, brunette, long hair, curly hair, different eye color, brown eyes, blue eyes, tan skin, dark skin, muscular, overweight, old, young child, anime, cartoon, 3d render, cropped head, cropped feet, cut off, partial body"
+# Negative prompt to avoid inconsistencies and ensure adult appearance
+NEGATIVE_PROMPT = "child, teen, teenager, young girl, underage, baby face, multiple people, crowd, group, different hair, blonde, brunette, long hair, curly hair, different eye color, brown eyes, blue eyes, tan skin, dark skin, muscular, overweight, elderly, anime, cartoon, 3d render, cropped head, cropped feet, cut off, partial body, deformed, ugly, blurry"
 
 
 def generate_luna_image(scenario: str, nsfw: bool = False, width: int = 1024, height: int = 1024, seed: int = None) -> bytes:
@@ -47,16 +47,18 @@ def generate_luna_image(scenario: str, nsfw: bool = False, width: int = 1024, he
         scenario = f"full length portrait showing complete body from top of head to bottom of feet, {scenario}"
 
     # Build the full prompt with Luna's consistent features
+    # Always emphasize adult woman to ensure mature appearance
     if nsfw:
-        # NSFW prompts - explicit but concise
-        full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic photograph, detailed skin texture, professional photography, soft lighting, NSFW adult content, high quality"
+        # NSFW prompts - explicit but concise, emphasizing adult features
+        full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic photograph, detailed adult anatomy, natural skin texture, professional photography, studio lighting, NSFW explicit adult content, masterpiece, best quality, ultra detailed"
     else:
-        full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic photograph, professional photography, soft lighting, high quality"
+        full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic photograph, professional photography, studio lighting, masterpiece, best quality, ultra detailed"
 
     # URL encode the prompt
     encoded_prompt = quote(full_prompt)
 
-    # Use consistent seed for same character, or random if not specified
+    # Use consistent seed for same character appearance
+    # Seed 42 ensures Luna looks the same across all images
     seed_param = f"&seed={seed}" if seed is not None else "&seed=42"
 
     # Build the API URL with parameters
