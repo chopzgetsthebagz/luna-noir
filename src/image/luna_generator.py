@@ -16,10 +16,10 @@ POLLINATIONS_API = "https://image.pollinations.ai/prompt"
 
 # Luna's core character description - ULTRA SPECIFIC for maximum consistency
 # IMPORTANT: Luna is clearly an adult woman (22 years old) with sexy proportions
-LUNA_BASE_DESCRIPTION = """adult woman Luna Noir exactly 22 years old, mature feminine features, shoulder-length lavender purple bob haircut with perfectly straight blunt bangs across forehead, almond-shaped bright violet purple eyes with thick black winged eyeliner, very pale porcelain white skin, heart-shaped face with high defined cheekbones, full pouty lips with dark plum lipstick, thin black leather choker necklace around neck, exactly one small minimalist black outline snake tattoo on outer right forearm 10cm below elbow, hourglass figure with narrow waist, perky medium C-cup breasts, flat toned stomach with subtle abs, wide feminine hips, thick toned thighs, round firm bubble butt, long shapely legs, 168cm tall 5foot6, athletic curvy body type, goth aesthetic, seductive confident expression, sultry gaze"""
+LUNA_BASE_DESCRIPTION = """adult woman Luna Noir exactly 22 years old, mature feminine features, shoulder-length lavender purple bob haircut with perfectly straight blunt bangs across forehead, almond-shaped bright violet purple eyes with thick black winged eyeliner, very pale porcelain white skin with natural skin texture and pores, heart-shaped face with high defined cheekbones, full pouty lips with dark plum lipstick, thin black leather choker necklace around neck, exactly one small minimalist black outline snake tattoo on outer right forearm 10cm below elbow, hourglass figure with narrow waist, perky medium C-cup breasts with small pink nipples and natural areolas, flat toned stomach with subtle abs, wide feminine hips, thick toned thighs, round firm bubble butt, long shapely legs, 168cm tall 5foot6, athletic curvy body type, goth aesthetic, seductive confident expression, sultry gaze, photorealistic human features"""
 
 # Negative prompt to avoid inconsistencies and ensure adult appearance
-NEGATIVE_PROMPT = "child, teen, teenager, young girl, underage, baby face, multiple people, crowd, group, different hair color, blonde hair, brunette hair, long hair, curly hair, different eye color, brown eyes, blue eyes, green eyes, tan skin, dark skin, tanned, muscular, overweight, flat chest, elderly, old, anime, cartoon, 3d render, cropped head, cropped feet, cut off, partial body, deformed, ugly, blurry, low quality, multiple tattoos, face tattoos, chest tattoos, back tattoos, sleeve tattoos"
+NEGATIVE_PROMPT = "child, teen, teenager, young girl, underage, baby face, multiple people, crowd, group, different hair color, blonde hair, brunette hair, long hair, curly hair, different eye color, brown eyes, blue eyes, green eyes, tan skin, dark skin, tanned, muscular, overweight, flat chest, elderly, old, anime, cartoon, 3d render, cropped head, cropped feet, cut off, partial body, deformed, ugly, blurry, low quality, multiple tattoos, face tattoos, chest tattoos, back tattoos, sleeve tattoos, pixelated, censored, blurred face, plastic skin, doll face, artificial, fake skin, smooth skin, airbrushed, oversaturated, deformed nipples, missing nipples, extra nipples"
 
 
 def generate_luna_image(scenario: str, nsfw: bool = False, width: int = 1536, height: int = 1536, seed: int = None) -> bytes:
@@ -49,10 +49,10 @@ def generate_luna_image(scenario: str, nsfw: bool = False, width: int = 1536, he
     # Build the full prompt with Luna's consistent features
     # Always emphasize adult woman to ensure mature appearance
     if nsfw:
-        # NSFW prompts - explicit but concise, emphasizing adult features and HIGH QUALITY
-        full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic photograph, detailed adult anatomy, natural skin texture, professional photography, studio lighting, NSFW explicit adult content, masterpiece, best quality, ultra detailed, 8K resolution, sharp focus, high definition, crisp details"
+        # NSFW prompts - explicit but concise, emphasizing adult features, natural anatomy, and HIGH QUALITY
+        full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic photograph, detailed adult anatomy with natural proportions, realistic skin texture with visible pores, natural breast anatomy with realistic nipples and areolas, professional photography, studio lighting, NSFW explicit adult content, masterpiece, best quality, ultra detailed, 8K resolution, sharp focus, high definition, crisp details, natural human features, realistic face, uncensored"
     else:
-        full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic photograph, professional photography, studio lighting, masterpiece, best quality, ultra detailed, 8K resolution, sharp focus, high definition, crisp details"
+        full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic photograph, realistic skin texture with visible pores, professional photography, studio lighting, masterpiece, best quality, ultra detailed, 8K resolution, sharp focus, high definition, crisp details, natural human features, realistic face"
 
     # URL encode the prompt
     encoded_prompt = quote(full_prompt)
@@ -61,7 +61,7 @@ def generate_luna_image(scenario: str, nsfw: bool = False, width: int = 1536, he
     # Seed 42 ensures Luna looks the same across all images
     seed_param = f"&seed={seed}" if seed is not None else "&seed=42"
 
-    # Build the API URL with parameters - HIGH RESOLUTION
+    # Build the API URL with parameters - HIGH RESOLUTION with natural features
     url = f"{POLLINATIONS_API}/{encoded_prompt}?width={width}&height={height}&model=flux&nologo=true&enhance=true{seed_param}"
 
     logger.info(f"Generating Luna image: {scenario[:50]}... (NSFW: {nsfw}, {width}x{height})")
