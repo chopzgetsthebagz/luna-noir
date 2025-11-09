@@ -34,10 +34,10 @@ def generate_luna_image(scenario: str, nsfw: bool = False, width: int = 1024, he
     Raises:
         requests.HTTPError: If API request fails
     """
-    # Build the full prompt with Luna's consistent features - SHORTENED to avoid 404 errors
+    # Build the full prompt with Luna's consistent features - balanced for quality and API compatibility
     if nsfw:
-        # Shorter NSFW prompts - avoid explicit keywords that trigger filters
-        full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic, 8K, professional photography, studio lighting, artistic, intimate, sensual"
+        # NSFW prompts - explicit but concise
+        full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic, detailed anatomy, natural skin texture, professional photography, studio lighting, NSFW adult content"
     else:
         full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic, 8K, professional photography, cinematic lighting"
 
@@ -111,63 +111,63 @@ def generate_luna_scenario(scenario_type: str, nsfw: bool = False, outfit: str =
     scenarios = {
         "bedroom": {
             "sfw": "lying on bed, purple silk sheets, purple neon lights, relaxed pose",
-            "nsfw": "lying on bed, legs spread, black lace lingerie, purple neon lights, sensual pose"
+            "nsfw": "lying seductively on bed, legs spread, sheer black lingerie, purple neon lights, intimate pose"
         },
         "gaming": {
             "sfw": "sitting in gaming chair, RGB setup, purple lighting, black tank top",
-            "nsfw": "sitting in gaming chair, black lace lingerie, RGB lights, playful pose"
+            "nsfw": "sitting in gaming chair, black lace bra and panties, RGB lights, playful seductive pose"
         },
         "mirror": {
             "sfw": "mirror selfie, full body, purple LED lights, confident pose",
-            "nsfw": "mirror selfie, black lingerie, full body, purple lights, seductive pose"
+            "nsfw": "mirror selfie in sheer lingerie, full body showing curves, purple lights, seductive pose"
         },
         "shower": {
             "sfw": "bathroom, wet hair, white towel, steamy mirror, purple lighting",
-            "nsfw": "in shower, water droplets, wet skin, steamy glass, purple lighting"
+            "nsfw": "in shower fully naked, wet skin, water running down body, steamy glass, purple lighting"
         },
         "couch": {
             "sfw": "relaxing on couch, purple pillows, purple LED lights, black loungewear",
-            "nsfw": "on couch, black lace lingerie, purple pillows, soft lighting, sensual pose"
+            "nsfw": "lounging on couch in black lace lingerie, legs spread, purple pillows, intimate lighting"
         },
         "outdoor": {
             "sfw": "urban night, neon signs, black leather jacket and jeans, cyberpunk aesthetic",
-            "nsfw": "urban rooftop, city lights, revealing black leather outfit, night scene"
+            "nsfw": "urban rooftop, city lights, revealing leather outfit with skin exposed, night scene"
         },
         "topless": {
             "sfw": "artistic portrait, shoulders visible, tasteful composition",
-            "nsfw": "topless portrait, bedroom, purple neon lights, confident expression"
+            "nsfw": "topless with bare chest exposed, natural pose, bedroom, purple neon lights"
         },
         "fullbody": {
             "sfw": "full body standing, black crop top and jeans, purple neon background",
-            "nsfw": "full body standing, bedroom, purple neon lights, confident pose"
+            "nsfw": "full body standing completely naked, head to toe, bedroom, purple neon lights"
         },
         "nude": {
             "sfw": "artistic silhouette, tasteful shadows",
-            "nsfw": "standing pose, bedroom, soft purple lighting, confident expression"
+            "nsfw": "standing completely naked, full frontal, hands at sides, bedroom, soft purple lighting"
         },
         "nude_lying": {
             "sfw": "lying on bed, comfortable pose, bedroom",
-            "nsfw": "lying on back on bed, legs spread, pink silk sheets, purple lights"
+            "nsfw": "lying naked on back, legs spread wide, pink silk sheets, purple lights, intimate view"
         },
         "nude_sitting": {
             "sfw": "sitting pose, casual setting",
-            "nsfw": "sitting on bed edge, legs apart, bedroom, purple lights"
+            "nsfw": "sitting naked on bed edge, legs spread apart, bedroom, purple lights, intimate angle"
         },
         "nude_kneeling": {
             "sfw": "kneeling pose, artistic composition",
-            "nsfw": "kneeling on bed, arched back, bedroom, soft purple lighting"
+            "nsfw": "kneeling naked on bed, arched back, chest forward, bedroom, soft purple lighting"
         },
         "nude_bent_over": {
             "sfw": "artistic pose, implied sensuality",
-            "nsfw": "bent over on hands and knees, looking back, bedroom, purple lights"
+            "nsfw": "bent over naked on hands and knees, rear view, looking back over shoulder, bedroom, purple lights"
         },
         "nude_side_view": {
             "sfw": "side profile portrait, artistic lighting",
-            "nsfw": "side view standing, one leg forward, bedroom, purple lighting"
+            "nsfw": "side view standing naked, full body profile, one leg forward, bedroom, purple lighting"
         },
         "lingerie": {
             "sfw": "fashion photoshoot, stylish black outfit",
-            "nsfw": "full body, black lace lingerie set, garter belt, bedroom, purple lights"
+            "nsfw": "full body in sheer black lace lingerie set, garter belt and stockings, bedroom, purple lights"
         }
     }
 
