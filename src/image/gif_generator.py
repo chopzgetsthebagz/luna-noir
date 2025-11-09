@@ -42,40 +42,33 @@ GIF_SCENARIOS = {
     },
     "pose": {
         "name": "Pose Sequence",
-        "frames": 6,
-        "duration": 500,
+        "frames": 3,  # REDUCED for faster generation
+        "duration": 600,
         "descriptions": [
-            "standing facing camera front view, hands on hips, confident pose",
-            "standing slightly turned to left, looking over shoulder at camera, confident pose",
-            "standing side view profile, looking at camera, confident pose",
-            "standing slightly turned to right, looking over shoulder at camera, confident pose",
-            "standing facing camera front view, hands on hips, confident pose",
-            "standing facing camera front view, hand in hair, seductive pose"
+            "standing hands on hips",
+            "standing hand in hair",
+            "standing hands on hips"
         ]
     },
     "tease": {
         "name": "Teasing",
-        "frames": 5,
-        "duration": 500,
+        "frames": 3,  # REDUCED for faster generation
+        "duration": 600,
         "descriptions": [
-            "standing facing camera wearing black lace lingerie, hands at sides, seductive smile",
-            "standing facing camera wearing black lace lingerie, hands touching bra strap, teasing smile",
-            "standing facing camera wearing black lace lingerie, pulling bra strap down shoulder, playful smile",
-            "standing facing camera topless covering breasts with hands, shy smile",
-            "standing facing camera topless hands at sides revealing breasts, confident seductive smile"
+            "standing finger on lips playful",
+            "standing hand on chest seductive",
+            "standing finger on lips playful"
         ]
     },
     "undress": {
         "name": "Undressing Sequence",
-        "frames": 6,
-        "duration": 600,
+        "frames": 4,  # REDUCED for faster generation
+        "duration": 700,
         "descriptions": [
-            "standing facing camera wearing black lace lingerie set, hands at sides, seductive smile",
-            "standing facing camera wearing black lace lingerie, hands reaching behind back to bra clasp, teasing smile",
-            "standing facing camera wearing black lace bra unclasped, holding bra in place with hands, playful smile",
-            "standing facing camera topless covering breasts with hands, shy smile",
-            "standing facing camera topless hands lowering to sides partially revealing breasts, confident smile",
-            "standing facing camera completely topless hands at sides breasts fully visible, seductive confident smile"
+            "standing fully clothed",
+            "standing shirt lifted showing bra",
+            "standing topless hands covering",
+            "standing topless hands lowered"
         ]
     },
     "dance": {
@@ -102,27 +95,22 @@ GIF_SCENARIOS = {
     },
     "nude_tease": {
         "name": "Nude Teasing",
-        "frames": 5,
-        "duration": 600,
+        "frames": 3,  # REDUCED for faster generation
+        "duration": 700,
         "descriptions": [
-            "standing nude facing camera covering breasts with hands and covering crotch with other hand, shy smile",
-            "standing nude facing camera covering breasts with one hand other hand at side, teasing smile",
-            "standing nude facing camera hands at sides breasts visible covering crotch with hand, confident smile",
-            "standing nude facing camera one hand in hair other hand at side breasts and body visible, seductive smile",
-            "standing nude facing camera both hands in hair fully nude body visible, confident seductive smile"
+            "nude covering breasts",
+            "nude hands on hips exposed",
+            "nude covering breasts"
         ]
     },
     "nude_pose": {
         "name": "Nude Pose Sequence",
-        "frames": 6,
-        "duration": 500,
+        "frames": 3,  # REDUCED for faster generation
+        "duration": 600,
         "descriptions": [
-            "standing nude facing camera front view hands on hips, confident pose",
-            "standing nude turned to left looking over shoulder at camera, confident pose",
-            "standing nude side view profile looking at camera, confident pose",
-            "standing nude turned to right looking over shoulder at camera showing back, confident pose",
-            "standing nude back view looking over shoulder at camera, confident pose",
-            "standing nude facing camera front view hand in hair, seductive pose"
+            "nude hands on hips",
+            "nude hand in hair",
+            "nude hands on hips"
         ]
     }
 }
