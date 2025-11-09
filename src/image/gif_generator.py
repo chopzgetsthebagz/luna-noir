@@ -22,26 +22,22 @@ LUNA_GIF_BASE = "Luna Noir, purple hair, violet eyes, pale skin, goth girl"
 GIF_SCENARIOS = {
     "wink": {
         "name": "Sultry Wink",
-        "frames": 5,
-        "duration": 400,  # ms per frame
+        "frames": 3,  # REDUCED for faster generation
+        "duration": 500,  # ms per frame
         "descriptions": [
-            "sultry selfie looking at camera with both eyes open, seductive smile",
-            "sultry selfie looking at camera with right eye slightly closing, seductive smile",
-            "sultry selfie looking at camera with right eye closed winking, seductive smile",
-            "sultry selfie looking at camera with right eye slightly opening, seductive smile",
-            "sultry selfie looking at camera with both eyes open, seductive smile"
+            "looking at camera both eyes open smiling",
+            "looking at camera winking right eye closed smiling",
+            "looking at camera both eyes open smiling"
         ]
     },
     "kiss": {
         "name": "Blowing Kiss",
-        "frames": 5,
-        "duration": 400,
+        "frames": 3,  # REDUCED for faster generation
+        "duration": 500,
         "descriptions": [
-            "sultry selfie looking at camera with seductive smile",
-            "sultry selfie looking at camera with lips slightly puckered",
-            "sultry selfie looking at camera blowing a kiss with puckered lips",
-            "sultry selfie looking at camera with hand near lips blowing kiss",
-            "sultry selfie looking at camera with seductive smile"
+            "looking at camera smiling",
+            "blowing kiss puckered lips",
+            "looking at camera smiling"
         ]
     },
     "pose": {
@@ -84,32 +80,24 @@ GIF_SCENARIOS = {
     },
     "dance": {
         "name": "Dancing",
-        "frames": 8,
-        "duration": 400,
+        "frames": 4,  # REDUCED from 8 for faster generation
+        "duration": 500,
         "descriptions": [
-            "standing facing camera hands on hips, confident pose",
-            "standing facing camera right hand raised above head left hand on hip, dancing pose",
-            "standing facing camera both hands raised above head, dancing pose",
-            "standing facing camera left hand raised above head right hand on hip, dancing pose",
-            "standing facing camera hands on hips swaying, dancing pose",
-            "standing facing camera right hand in hair left hand on hip, dancing pose",
-            "standing facing camera both hands in hair, dancing pose",
-            "standing facing camera hands on hips, confident pose"
+            "dancing arms raised",
+            "dancing hips swaying right",
+            "dancing arms out",
+            "dancing hips swaying left"
         ]
     },
     "rotate": {
         "name": "360° Rotation",
-        "frames": 8,
-        "duration": 500,
+        "frames": 4,  # REDUCED from 8 for faster generation
+        "duration": 600,
         "descriptions": [
-            "full length portrait showing complete body from head to feet, standing facing camera front view, hands at sides",
-            "full length portrait showing complete body from head to feet, standing turned 45 degrees to left, looking at camera",
-            "full length portrait showing complete body from head to feet, standing left side view profile, looking at camera",
-            "full length portrait showing complete body from head to feet, standing turned 135 degrees showing back and left side, looking over shoulder",
-            "full length portrait showing complete body from head to feet, standing back view showing back, looking over shoulder",
-            "full length portrait showing complete body from head to feet, standing turned 225 degrees showing back and right side, looking over shoulder",
-            "full length portrait showing complete body from head to feet, standing right side view profile, looking at camera",
-            "full length portrait showing complete body from head to feet, standing turned 315 degrees to right, looking at camera"
+            "full body facing camera",
+            "full body right side view",
+            "full body back view",
+            "full body left side view"
         ]
     },
     "nude_tease": {
