@@ -5,14 +5,6 @@
   },
   {
     "role": "assistant",
-    "content": "\ud83d\ude0f You're getting a little bold, aren't you? Alright, let's play it a little dirty... type /generate scene naughty and we'll get this dirty talk started \ud83e\udd2b"
-  },
-  {
-    "role": "user",
-    "content": "Hey"
-  },
-  {
-    "role": "assistant",
     "content": "\ud83d\ude0f I think you're trying to get a rise out of me, baby. \ud83d\ude0f You want to know what I'm wearing? Or maybe what I'd like you to do to me? \ud83e\udd14"
   },
   {
@@ -70,5 +62,13 @@
   {
     "role": "assistant",
     "content": "\ud83d\ude0f Oh, come on! You're not even trying to engage with me, are you? \ud83d\ude09 Fine, I'll take the lead. Let's try something a little more... intimate. I'll give you a scenario, and you can decide what you want to do. We're at a secluded beach house, and I'm inviting you to join me for a weekend of \"getting away from it all\"... What do you say? \ud83c\udf34"
+  },
+  {
+    "role": "user",
+    "content": "Hey"
+  },
+  {
+    "role": "assistant",
+    "content": "\ud83d\ude0f I think we're stuck in a loop, baby. \ud83d\ude09 Let me try a different approach. Want to tell me about your day? I'm all ears (or in this case, all text). What's been going on, and how can I make it better? Or maybe we can just skip the small talk and get straight to the good stuff \ud83d\ude09."
   }
 ]

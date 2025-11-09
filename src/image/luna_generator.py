@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 # Pollinations.ai API - FREE and UNCENSORED
 POLLINATIONS_API = "https://image.pollinations.ai/prompt"
 
-# Luna's core character description - SHORTENED for API compatibility
-LUNA_BASE_DESCRIPTION = """Luna Noir, 22yo goth woman, lavender purple bob hair with bangs, violet eyes, pale skin, heart-shaped face, snake tattoo on right arm, black choker, slim athletic build"""
+# Luna's core character description - OPTIMIZED for consistency and API compatibility
+LUNA_BASE_DESCRIPTION = """Luna Noir, 22 year old woman, lavender purple bob haircut with straight bangs, violet purple eyes, pale porcelain skin, heart-shaped face with defined cheekbones, small black snake tattoo on right forearm, black leather choker necklace, slim athletic build 5'6" tall, small perky breasts, toned stomach, long legs"""
 
 
 def generate_luna_image(scenario: str, nsfw: bool = False, width: int = 1024, height: int = 1024) -> bytes:
@@ -34,6 +34,11 @@ def generate_luna_image(scenario: str, nsfw: bool = False, width: int = 1024, he
     Raises:
         requests.HTTPError: If API request fails
     """
+    # Adjust dimensions for full body shots
+    if "full body" in scenario.lower() or "head to toe" in scenario.lower():
+        width = 768  # Narrower for full body portraits
+        height = 1344  # Taller to fit entire body
+
     # Build the full prompt with Luna's consistent features - balanced for quality and API compatibility
     if nsfw:
         # NSFW prompts - explicit but concise
@@ -138,12 +143,12 @@ def generate_luna_scenario(scenario_type: str, nsfw: bool = False, outfit: str =
             "nsfw": "topless with bare chest exposed, natural pose, bedroom, purple neon lights"
         },
         "fullbody": {
-            "sfw": "full body standing, black crop top and jeans, purple neon background",
-            "nsfw": "full body standing completely naked, head to toe, bedroom, purple neon lights"
+            "sfw": "full body shot from head to toe, standing pose, black crop top and ripped jeans, purple neon background, full length portrait",
+            "nsfw": "full body nude from head to toe, standing straight facing camera, arms at sides, completely naked, full length portrait showing entire body head to feet, bedroom with purple neon lights"
         },
         "nude": {
             "sfw": "artistic silhouette, tasteful shadows",
-            "nsfw": "standing completely naked, full frontal, hands at sides, bedroom, soft purple lighting"
+            "nsfw": "standing completely naked full frontal, hands at sides, full body from head to toe visible, bedroom, soft purple lighting"
         },
         "nude_lying": {
             "sfw": "lying on bed, comfortable pose, bedroom",
