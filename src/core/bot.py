@@ -1412,7 +1412,15 @@ def create_bot(token: str):
                 await query.answer("🔒 This GIF requires NSFW mode!", show_alert=True)
                 return
 
-            await query.edit_message_text("🎬 *Generating animated GIF\\.\\.\\.*\n\nThis may take 1\\-2 minutes\\. Creating multiple frames\\.\\.\\. 💜", parse_mode="MarkdownV2")
+            # ANSWER CALLBACK IMMEDIATELY to prevent timeout
+            await query.answer("🎬 Generating GIF... This will take ~1 minute")
+
+            # Send status message as NEW message (not edit)
+            status_msg = await context.bot.send_message(
+                chat_id=chat_id,
+                text="🎬 *Generating animated GIF\\.\\.\\.*\n\nThis may take 1\\-2 minutes\\. Creating multiple frames\\.\\.\\. 💜",
+                parse_mode="MarkdownV2"
+            )
 
             try:
                 # Generate GIF
@@ -1420,6 +1428,9 @@ def create_bot(token: str):
 
                 # Deduct image credit/usage
                 use_image_generation(user_id)
+
+                # Delete status message
+                await status_msg.delete()
 
                 # Send the GIF as animation
                 await context.bot.send_animation(
@@ -1444,13 +1455,27 @@ def create_bot(token: str):
                         trial = get_trial_status(user_id)
                         images_remaining += trial.get("images_remaining", 0)
 
-                # Update message with subtle upsell
+                # Send upsell message as new message
                 upsell_msg = get_after_image_upsell_message(images_remaining, plan)
-                await query.edit_message_text(escape_md(upsell_msg), parse_mode="MarkdownV2")
+                await context.bot.send_message(
+                    chat_id=chat_id,
+                    text=escape_md(upsell_msg),
+                    parse_mode="MarkdownV2"
+                )
 
             except Exception as e:
                 logger.exception(f"GIF generation failed: {e}")
-                await query.edit_message_text("⚠️ *GIF generation failed\\.*\n\nPlease try again\\.", parse_mode="MarkdownV2")
+                # Delete status message
+                try:
+                    await status_msg.delete()
+                except:
+                    pass
+                # Send error message
+                await context.bot.send_message(
+                    chat_id=chat_id,
+                    text="⚠️ *GIF generation failed\\.*\n\nPlease try again\\.",
+                    parse_mode="MarkdownV2"
+                )
 
         # Handle voice toggle
         elif data == "voice_toggle":
