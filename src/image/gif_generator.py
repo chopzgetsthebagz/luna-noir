@@ -5,11 +5,18 @@ Creates animated GIFs from multiple Luna images
 
 import io
 import logging
+import requests
+from urllib.parse import quote
 from PIL import Image
 from typing import List, Tuple
-from .luna_generator import generate_custom_luna
 
 logger = logging.getLogger(__name__)
+
+# Pollinations.ai API endpoint
+POLLINATIONS_API = "https://image.pollinations.ai/prompt"
+
+# SIMPLIFIED Luna description for GIFs (much shorter to avoid 502 errors)
+LUNA_GIF_BASE = "Luna Noir, 22yo woman, lavender purple bob hair, violet eyes, pale skin, goth aesthetic, photorealistic"
 
 # GIF animation scenarios with frame descriptions
 GIF_SCENARIOS = {
@@ -133,31 +140,63 @@ GIF_SCENARIOS = {
 }
 
 
+def generate_gif_frame(description: str, nsfw: bool = False) -> bytes:
+    """
+    Generate a single GIF frame with simplified prompt to avoid 502 errors.
+
+    Args:
+        description: Short description of the frame
+        nsfw: Whether to generate NSFW content
+
+    Returns:
+        bytes: PNG image data
+    """
+    # Build simplified prompt for GIFs
+    if nsfw:
+        prompt = f"{LUNA_GIF_BASE}, {description}, NSFW, 8K"
+    else:
+        prompt = f"{LUNA_GIF_BASE}, {description}, 8K"
+
+    # URL encode
+    encoded_prompt = quote(prompt)
+
+    # Use consistent seed for same character
+    url = f"{POLLINATIONS_API}/{encoded_prompt}?width=768&height=768&model=flux&nologo=true&seed=42"
+
+    logger.debug(f"GIF frame URL length: {len(url)} chars")
+
+    # Make request
+    response = requests.get(url, timeout=30)
+    response.raise_for_status()
+
+    return response.content
+
+
 def generate_gif_frames(scenario_type: str, nsfw: bool = False) -> List[bytes]:
     """
     Generate individual frames for a GIF animation
-    
+
     Args:
         scenario_type: Type of GIF scenario (wink, kiss, pose, etc.)
         nsfw: Whether to generate NSFW content
-        
+
     Returns:
         List of image bytes for each frame
     """
     if scenario_type not in GIF_SCENARIOS:
         raise ValueError(f"Unknown GIF scenario: {scenario_type}. Available: {list(GIF_SCENARIOS.keys())}")
-    
+
     scenario = GIF_SCENARIOS[scenario_type]
     frames = []
-    
+
     logger.info(f"Generating {scenario['frames']} frames for '{scenario['name']}' GIF (NSFW: {nsfw})")
-    
+
     for i, description in enumerate(scenario['descriptions'], 1):
         logger.info(f"Generating frame {i}/{scenario['frames']}: {description[:50]}...")
-        
+
         try:
-            # Generate image for this frame using custom prompt
-            image_bytes = generate_custom_luna(custom_prompt=description, nsfw=nsfw)
+            # Generate image for this frame using simplified GIF generator
+            image_bytes = generate_gif_frame(description=description, nsfw=nsfw)
 
             frames.append(image_bytes)
             logger.info(f"Frame {i}/{scenario['frames']} generated: {len(image_bytes):,} bytes")
@@ -165,7 +204,7 @@ def generate_gif_frames(scenario_type: str, nsfw: bool = False) -> List[bytes]:
         except Exception as e:
             logger.error(f"Failed to generate frame {i}: {e}")
             raise
-    
+
     return frames
 
 
