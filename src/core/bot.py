@@ -1988,7 +1988,7 @@ def create_bot(token: str):
 
     # Register callback handlers with patterns
     app.add_handler(CallbackQueryHandler(menu_callback, pattern="^menu_"))
-    app.add_handler(CallbackQueryHandler(action_callback, pattern="^(gen_|voice_toggle|action_)"))
+    app.add_handler(CallbackQueryHandler(action_callback, pattern="^(gen_|gif_|voice_toggle|action_)"))
     app.add_handler(CallbackQueryHandler(upsell_callback, pattern="^(start_trial|show_plans|show_credits|subscribe:|buy_credits:)"))
     app.add_handler(CallbackQueryHandler(mode_callback))  # Catch-all for mode changes
 
