@@ -14,11 +14,15 @@ logger = logging.getLogger(__name__)
 # Pollinations.ai API - FREE and UNCENSORED
 POLLINATIONS_API = "https://image.pollinations.ai/prompt"
 
-# Luna's core character description - OPTIMIZED for consistency and API compatibility
-LUNA_BASE_DESCRIPTION = """Luna Noir, 22 year old woman, lavender purple bob haircut with straight bangs, violet purple eyes, pale porcelain skin, heart-shaped face with defined cheekbones, small black snake tattoo on right forearm, black leather choker necklace, slim athletic build 5'6" tall, small perky breasts, toned stomach, long legs"""
+# Luna's core character description - HIGHLY SPECIFIC for maximum consistency
+# Using exact same description every time to ensure same person
+LUNA_BASE_DESCRIPTION = """1girl Luna Noir, young adult woman age 22, shoulder-length lavender purple bob cut hair with blunt straight bangs covering forehead, bright violet eyes, very pale white skin, heart shaped face, thin black choker around neck, small simple black line art snake tattoo on right forearm, petite slim body type, 165cm tall"""
+
+# Negative prompt to avoid inconsistencies
+NEGATIVE_PROMPT = "multiple people, crowd, group, different hair, blonde, brunette, long hair, curly hair, different eye color, brown eyes, blue eyes, tan skin, dark skin, muscular, overweight, old, young child, anime, cartoon, 3d render, cropped head, cropped feet, cut off, partial body"
 
 
-def generate_luna_image(scenario: str, nsfw: bool = False, width: int = 1024, height: int = 1024) -> bytes:
+def generate_luna_image(scenario: str, nsfw: bool = False, width: int = 1024, height: int = 1024, seed: int = None) -> bytes:
     """
     Generate an image of Luna in a specific scenario.
 
@@ -27,6 +31,7 @@ def generate_luna_image(scenario: str, nsfw: bool = False, width: int = 1024, he
         nsfw: Whether to allow NSFW content
         width: Image width (default 1024)
         height: Image height (default 1024)
+        seed: Random seed for reproducibility (None = random)
 
     Returns:
         bytes: PNG image data
@@ -34,25 +39,30 @@ def generate_luna_image(scenario: str, nsfw: bool = False, width: int = 1024, he
     Raises:
         requests.HTTPError: If API request fails
     """
-    # Adjust dimensions for full body shots
-    if "full body" in scenario.lower() or "head to toe" in scenario.lower():
-        width = 768  # Narrower for full body portraits
-        height = 1344  # Taller to fit entire body
+    # Adjust dimensions for full body shots - MUCH taller aspect ratio
+    if "full body" in scenario.lower() or "head to toe" in scenario.lower() or "standing" in scenario.lower():
+        width = 640   # Narrower for full body portraits
+        height = 1536  # Much taller to ensure feet are visible
+        # Add explicit framing instruction
+        scenario = f"full length portrait showing complete body from top of head to bottom of feet, {scenario}"
 
-    # Build the full prompt with Luna's consistent features - balanced for quality and API compatibility
+    # Build the full prompt with Luna's consistent features
     if nsfw:
         # NSFW prompts - explicit but concise
-        full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic, detailed anatomy, natural skin texture, professional photography, studio lighting, NSFW adult content"
+        full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic photograph, detailed skin texture, professional photography, soft lighting, NSFW adult content, high quality"
     else:
-        full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic, 8K, professional photography, cinematic lighting"
+        full_prompt = f"{LUNA_BASE_DESCRIPTION}, {scenario}, photorealistic photograph, professional photography, soft lighting, high quality"
 
     # URL encode the prompt
     encoded_prompt = quote(full_prompt)
 
-    # Build the API URL with parameters - using seed for more consistency
-    url = f"{POLLINATIONS_API}/{encoded_prompt}?width={width}&height={height}&model=flux&nologo=true&enhance=true&seed=42"
+    # Use consistent seed for same character, or random if not specified
+    seed_param = f"&seed={seed}" if seed is not None else "&seed=42"
 
-    logger.info(f"Generating Luna image: {scenario[:50]}... (NSFW: {nsfw})")
+    # Build the API URL with parameters
+    url = f"{POLLINATIONS_API}/{encoded_prompt}?width={width}&height={height}&model=flux&nologo=true&enhance=true{seed_param}"
+
+    logger.info(f"Generating Luna image: {scenario[:50]}... (NSFW: {nsfw}, {width}x{height})")
 
     try:
         # Pollinations.ai returns the image directly
@@ -143,12 +153,12 @@ def generate_luna_scenario(scenario_type: str, nsfw: bool = False, outfit: str =
             "nsfw": "topless with bare chest exposed, natural pose, bedroom, purple neon lights"
         },
         "fullbody": {
-            "sfw": "full body shot from head to toe, standing pose, black crop top and ripped jeans, purple neon background, full length portrait",
-            "nsfw": "full body nude from head to toe, standing straight facing camera, arms at sides, completely naked, full length portrait showing entire body head to feet, bedroom with purple neon lights"
+            "sfw": "standing pose, wearing black crop top and ripped jeans, purple neon background, camera pulled back to show entire body",
+            "nsfw": "standing straight with arms at sides, completely naked, bedroom with purple neon lights, camera angle showing complete nude body"
         },
         "nude": {
             "sfw": "artistic silhouette, tasteful shadows",
-            "nsfw": "standing completely naked full frontal, hands at sides, full body from head to toe visible, bedroom, soft purple lighting"
+            "nsfw": "standing straight with hands at sides, completely naked, bedroom, soft purple lighting, frontal view"
         },
         "nude_lying": {
             "sfw": "lying on bed, comfortable pose, bedroom",
