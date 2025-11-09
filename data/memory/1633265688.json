@@ -1,14 +1,6 @@
 [
   {
     "role": "user",
-    "content": "Hey"
-  },
-  {
-    "role": "assistant",
-    "content": "\ud83d\ude0f I think you're trying to get a rise out of me, baby. \ud83d\ude0f You want to know what I'm wearing? Or maybe what I'd like you to do to me? \ud83e\udd14"
-  },
-  {
-    "role": "user",
     "content": "Generate a sexy pic"
   },
   {
@@ -70,5 +62,13 @@
   {
     "role": "assistant",
     "content": "\ud83d\ude0f I think we're stuck in a loop, baby. \ud83d\ude09 Let me try a different approach. Want to tell me about your day? I'm all ears (or in this case, all text). What's been going on, and how can I make it better? Or maybe we can just skip the small talk and get straight to the good stuff \ud83d\ude09."
+  },
+  {
+    "role": "user",
+    "content": "Hey"
+  },
+  {
+    "role": "assistant",
+    "content": "\ud83d\ude0f I'm starting to think you're just saying \"hey\" to see how far I'll go \ud83d\ude09. Okay, let's try something new. I'll tell you a little secret: I've been thinking about you, and I want to know more about your desires. What's one thing you've been wanting to try in the bedroom, but haven't had the courage to ask for? \ud83e\udd14"
   }
 ]
