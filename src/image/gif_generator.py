@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 # Pollinations.ai API endpoint
 POLLINATIONS_API = "https://image.pollinations.ai/prompt"
 
-# SIMPLIFIED Luna description for GIFs (much shorter to avoid 502 errors)
-LUNA_GIF_BASE = "Luna Noir, 22yo woman, lavender purple bob hair, violet eyes, pale skin, goth aesthetic, photorealistic"
+# ULTRA-SIMPLIFIED Luna description for GIFs (very short to avoid 502 errors)
+LUNA_GIF_BASE = "Luna Noir, purple hair, violet eyes, pale skin, goth girl"
 
 # GIF animation scenarios with frame descriptions
 GIF_SCENARIOS = {
@@ -140,36 +140,68 @@ GIF_SCENARIOS = {
 }
 
 
-def generate_gif_frame(description: str, nsfw: bool = False) -> bytes:
+def generate_gif_frame(description: str, nsfw: bool = False, retries: int = 3) -> bytes:
     """
     Generate a single GIF frame with simplified prompt to avoid 502 errors.
 
     Args:
         description: Short description of the frame
         nsfw: Whether to generate NSFW content
+        retries: Number of retry attempts on failure
 
     Returns:
         bytes: PNG image data
     """
-    # Build simplified prompt for GIFs
+    import time
+
+    # Build ULTRA-simplified prompt for GIFs (keep it very short)
     if nsfw:
-        prompt = f"{LUNA_GIF_BASE}, {description}, NSFW, 8K"
+        prompt = f"{LUNA_GIF_BASE}, {description}, NSFW"
     else:
-        prompt = f"{LUNA_GIF_BASE}, {description}, 8K"
+        prompt = f"{LUNA_GIF_BASE}, {description}"
 
     # URL encode
     encoded_prompt = quote(prompt)
 
-    # Use consistent seed for same character
-    url = f"{POLLINATIONS_API}/{encoded_prompt}?width=768&height=768&model=flux&nologo=true&seed=42"
+    # Use consistent seed for same character, smaller size for faster generation
+    url = f"{POLLINATIONS_API}/{encoded_prompt}?width=512&height=512&model=flux&nologo=true&seed=42"
 
+    logger.debug(f"GIF frame URL: {url}")
     logger.debug(f"GIF frame URL length: {len(url)} chars")
 
-    # Make request
-    response = requests.get(url, timeout=30)
-    response.raise_for_status()
+    # Retry logic for errors (502, timeouts, etc.)
+    last_error = None
+    for attempt in range(retries):
+        try:
+            logger.debug(f"Attempt {attempt + 1}/{retries}")
+            # Longer timeout (60s) and retry on any error
+            response = requests.get(url, timeout=60)
+            response.raise_for_status()
+            logger.debug(f"Frame generated successfully: {len(response.content):,} bytes")
+            return response.content
 
-    return response.content
+        except requests.exceptions.Timeout as e:
+            last_error = e
+            logger.warning(f"Timeout on attempt {attempt + 1}/{retries}, retrying in 3s...")
+            time.sleep(3)
+
+        except requests.exceptions.HTTPError as e:
+            last_error = e
+            if e.response.status_code == 502:
+                logger.warning(f"502 error on attempt {attempt + 1}/{retries}, retrying in 3s...")
+                time.sleep(3)
+            else:
+                raise  # Re-raise non-502 HTTP errors immediately
+
+        except Exception as e:
+            last_error = e
+            logger.warning(f"Error on attempt {attempt + 1}/{retries}: {type(e).__name__}: {e}")
+            if attempt < retries - 1:  # Don't sleep on last attempt
+                time.sleep(3)
+
+    # All retries failed
+    logger.error(f"All {retries} attempts failed for frame generation")
+    raise last_error
 
 
 def generate_gif_frames(scenario_type: str, nsfw: bool = False) -> List[bytes]:
