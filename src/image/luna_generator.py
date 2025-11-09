@@ -14,12 +14,12 @@ logger = logging.getLogger(__name__)
 # Pollinations.ai API - FREE and UNCENSORED
 POLLINATIONS_API = "https://image.pollinations.ai/prompt"
 
-# Luna's core character description - HIGHLY SPECIFIC for maximum consistency
-# IMPORTANT: Luna is clearly an adult woman (22 years old)
-LUNA_BASE_DESCRIPTION = """adult woman Luna Noir age 22 years old, mature feminine features, shoulder-length lavender purple bob haircut with straight blunt bangs, bright violet purple eyes with dark eyeliner, very pale porcelain white skin, defined cheekbones, full lips with dark lipstick, thin black leather choker necklace, small black snake line tattoo on right forearm, slim petite feminine figure, small natural breasts, toned stomach, long legs, 165cm tall, goth aesthetic, confident mature expression"""
+# Luna's core character description - ULTRA SPECIFIC for maximum consistency
+# IMPORTANT: Luna is clearly an adult woman (22 years old) with sexy proportions
+LUNA_BASE_DESCRIPTION = """adult woman Luna Noir exactly 22 years old, mature feminine features, shoulder-length lavender purple bob haircut with perfectly straight blunt bangs across forehead, almond-shaped bright violet purple eyes with thick black winged eyeliner, very pale porcelain white skin, heart-shaped face with high defined cheekbones, full pouty lips with dark plum lipstick, thin black leather choker necklace around neck, exactly one small minimalist black outline snake tattoo on outer right forearm 10cm below elbow, hourglass figure with narrow waist, perky medium C-cup breasts, flat toned stomach with subtle abs, wide feminine hips, thick toned thighs, round firm bubble butt, long shapely legs, 168cm tall 5foot6, athletic curvy body type, goth aesthetic, seductive confident expression, sultry gaze"""
 
 # Negative prompt to avoid inconsistencies and ensure adult appearance
-NEGATIVE_PROMPT = "child, teen, teenager, young girl, underage, baby face, multiple people, crowd, group, different hair, blonde, brunette, long hair, curly hair, different eye color, brown eyes, blue eyes, tan skin, dark skin, muscular, overweight, elderly, anime, cartoon, 3d render, cropped head, cropped feet, cut off, partial body, deformed, ugly, blurry"
+NEGATIVE_PROMPT = "child, teen, teenager, young girl, underage, baby face, multiple people, crowd, group, different hair color, blonde hair, brunette hair, long hair, curly hair, different eye color, brown eyes, blue eyes, green eyes, tan skin, dark skin, tanned, muscular, overweight, flat chest, elderly, old, anime, cartoon, 3d render, cropped head, cropped feet, cut off, partial body, deformed, ugly, blurry, low quality, multiple tattoos, face tattoos, chest tattoos, back tattoos, sleeve tattoos"
 
 
 def generate_luna_image(scenario: str, nsfw: bool = False, width: int = 1024, height: int = 1024, seed: int = None) -> bytes:
