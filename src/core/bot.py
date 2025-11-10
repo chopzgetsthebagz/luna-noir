@@ -1432,10 +1432,15 @@ def create_bot(token: str):
                 # Delete status message
                 await status_msg.delete()
 
+                # Convert bytes to BytesIO for Telegram
+                from io import BytesIO
+                gif_file = BytesIO(gif_bytes)
+                gif_file.name = f"{gif_name.replace(' ', '_').lower()}.gif"
+
                 # Send the GIF as animation
                 await context.bot.send_animation(
                     chat_id=chat_id,
-                    animation=gif_bytes,
+                    animation=gif_file,
                     caption=f"🎬 {gif_name}"
                 )
 
