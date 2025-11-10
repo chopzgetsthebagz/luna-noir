@@ -15,8 +15,12 @@ logger = logging.getLogger(__name__)
 # Pollinations.ai API endpoint
 POLLINATIONS_API = "https://image.pollinations.ai/prompt"
 
-# ULTRA-SIMPLIFIED Luna description for GIFs (very short to avoid 502 errors)
-LUNA_GIF_BASE = "Luna Noir, purple hair, violet eyes, pale skin, goth girl"
+# Luna's core character description - CONSISTENT with main generator
+# Using same description as luna_generator.py for character consistency
+LUNA_GIF_BASE = """adult woman Luna Noir exactly 22 years old, shoulder-length lavender purple bob haircut with straight blunt bangs, almond-shaped bright violet purple eyes with thick black winged eyeliner and long black lashes, very pale porcelain white skin, heart-shaped face with high cheekbones and delicate jawline, full pouty lips with dark plum matte lipstick, small straight nose, thin black leather choker necklace, single small minimalist black outline snake tattoo on outer right forearm 8cm below elbow facing forward no other tattoos anywhere, hourglass figure with narrow waist, perky C-cup breasts, flat toned stomach, wide feminine hips, thick toned thighs, round firm bubble butt, long shapely legs, 168cm tall, athletic curvy body, goth aesthetic, seductive confident expression, sultry gaze, photorealistic"""
+
+# Negative prompt for consistency
+NEGATIVE_PROMPT = "child, teen, teenager, young girl, underage, baby face, multiple people, different hair color, blonde hair, brunette hair, long hair, curly hair, different eye color, brown eyes, blue eyes, tan skin, dark skin, anime, cartoon, 3d render, cropped, deformed, ugly, blurry, low quality, many tattoos, multiple tattoos, pixelated, low resolution, censored, plastic skin, doll face, smooth skin, airbrushed"
 
 # GIF animation scenarios with frame descriptions
 GIF_SCENARIOS = {
@@ -118,10 +122,10 @@ GIF_SCENARIOS = {
 
 def generate_gif_frame(description: str, nsfw: bool = False, retries: int = 3) -> bytes:
     """
-    Generate a single GIF frame with simplified prompt to avoid 502 errors.
+    Generate a single GIF frame with Luna's consistent character description.
 
     Args:
-        description: Short description of the frame
+        description: Short description of the frame action/pose
         nsfw: Whether to generate NSFW content
         retries: Number of retry attempts on failure
 
@@ -130,17 +134,20 @@ def generate_gif_frame(description: str, nsfw: bool = False, retries: int = 3) -
     """
     import time
 
-    # Build ULTRA-simplified prompt for GIFs (keep it very short)
+    # Build prompt with full Luna description for consistency
     if nsfw:
-        prompt = f"{LUNA_GIF_BASE}, {description}, NSFW"
+        prompt = f"{LUNA_GIF_BASE}, {description}, professional photography, NSFW explicit, photorealistic, 8K, sharp focus"
     else:
-        prompt = f"{LUNA_GIF_BASE}, {description}"
+        prompt = f"{LUNA_GIF_BASE}, {description}, professional photography, photorealistic, 8K, sharp focus"
 
-    # URL encode
+    # URL encode the prompt
     encoded_prompt = quote(prompt)
 
+    # URL encode the negative prompt
+    encoded_negative = quote(NEGATIVE_PROMPT)
+
     # Use consistent seed for same character, smaller size for faster generation
-    url = f"{POLLINATIONS_API}/{encoded_prompt}?width=512&height=512&model=flux&nologo=true&seed=42"
+    url = f"{POLLINATIONS_API}/{encoded_prompt}?width=512&height=512&model=flux&nologo=true&enhance=true&seed=42&negative={encoded_negative}"
 
     logger.debug(f"GIF frame URL: {url}")
     logger.debug(f"GIF frame URL length: {len(url)} chars")
