@@ -14,7 +14,6 @@ from src.utils.md import escape_md, render_markdown
 from src.metrics import db as metrics
 from src.voice.tts_elevenlabs import synthesize_tts
 from src.image.luna_generator import generate_luna_selfie, generate_luna_scenario, generate_custom_luna
-from src.image.gif_generator import generate_luna_gif, get_available_gifs
 from src.game.xp import gain_xp, get_profile, claim_daily
 from src.game.unlocks import has_unlock, get_unlock_requirement, get_tier
 from src.game.quests import list_quests, try_autocomplete, claim as claim_quest, get_quest_xp
@@ -939,9 +938,6 @@ def create_bot(token: str):
                         InlineKeyboardButton("👗 Choose Outfit", callback_data="menu_outfits")
                     ],
                     [
-                        InlineKeyboardButton("🎬 Animated GIFs", callback_data="menu_gifs")
-                    ],
-                    [
                         InlineKeyboardButton("« Back", callback_data="menu_main")
                     ]
                 ]
@@ -959,9 +955,6 @@ def create_bot(token: str):
                     [
                         InlineKeyboardButton("🪞 Mirror Selfie", callback_data="gen_scene_mirror"),
                         InlineKeyboardButton("👗 Choose Outfit", callback_data="menu_outfits")
-                    ],
-                    [
-                        InlineKeyboardButton("🎬 Animated GIFs", callback_data="menu_gifs")
                     ],
                     [InlineKeyboardButton("« Back to Menu", callback_data="menu_main")]
                 ]
@@ -1198,61 +1191,6 @@ def create_bot(token: str):
                 reply_markup=reply_markup
             )
 
-        elif data == "menu_gifs":
-            # Show GIF animation selection menu
-            user_mode = get_user_mode(user_id)
-            is_nsfw = user_mode in ["NSFW", "SPICY"]
-
-            if is_nsfw:
-                # NSFW GIF options
-                keyboard = [
-                    [
-                        InlineKeyboardButton("😉 Sultry Wink", callback_data="gif_wink"),
-                        InlineKeyboardButton("😘 Blowing Kiss", callback_data="gif_kiss")
-                    ],
-                    [
-                        InlineKeyboardButton("💃 Pose Sequence", callback_data="gif_pose"),
-                        InlineKeyboardButton("🔄 360° Rotation", callback_data="gif_rotate")
-                    ],
-                    [
-                        InlineKeyboardButton("💃 Dancing", callback_data="gif_dance"),
-                        InlineKeyboardButton("😈 Teasing", callback_data="gif_tease")
-                    ],
-                    [
-                        InlineKeyboardButton("👗 Undressing", callback_data="gif_undress"),
-                        InlineKeyboardButton("🔞 Nude Teasing", callback_data="gif_nude_tease")
-                    ],
-                    [
-                        InlineKeyboardButton("🔞 Nude Poses", callback_data="gif_nude_pose")
-                    ],
-                    [InlineKeyboardButton("« Back", callback_data="menu_generate")]
-                ]
-                msg = "🎬 *Animated GIFs* \\(NSFW enabled\\)\n\nChoose an animation\\. Each GIF is 3\\-5 seconds\\."
-            else:
-                # SFW GIF options
-                keyboard = [
-                    [
-                        InlineKeyboardButton("😉 Sultry Wink", callback_data="gif_wink"),
-                        InlineKeyboardButton("😘 Blowing Kiss", callback_data="gif_kiss")
-                    ],
-                    [
-                        InlineKeyboardButton("💃 Pose Sequence", callback_data="gif_pose"),
-                        InlineKeyboardButton("🔄 360° Rotation", callback_data="gif_rotate")
-                    ],
-                    [
-                        InlineKeyboardButton("💃 Dancing", callback_data="gif_dance")
-                    ],
-                    [InlineKeyboardButton("« Back", callback_data="menu_generate")]
-                ]
-                msg = "🎬 *Animated GIFs*\n\nChoose an animation\\. Each GIF is 3\\-5 seconds\\."
-
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await query.edit_message_text(
-                msg,
-                parse_mode="MarkdownV2",
-                reply_markup=reply_markup
-            )
-
         elif data == "menu_main":
             # Return to main menu
             current_mode = get_user_mode(user_id)
@@ -1381,106 +1319,6 @@ def create_bot(token: str):
             except Exception as e:
                 logger.exception(f"Image generation failed: {e}")
                 await query.edit_message_text("⚠️ *Image generation failed\\.*\n\nPlease try again\\.", parse_mode="MarkdownV2")
-
-        # Handle GIF generation buttons
-        elif data.startswith("gif_"):
-            # Import upsell functions
-            from src.payment import can_generate_image, use_image_generation, get_user_plan, get_image_limit_reached_message, get_after_image_upsell_message
-
-            # Check if user can generate image (GIFs count as 1 image)
-            can_generate, reason = can_generate_image(user_id)
-
-            if not can_generate:
-                # Show upsell message
-                plan = get_user_plan(user_id)
-                msg, keyboard = get_image_limit_reached_message(plan)
-                await query.edit_message_text(
-                    msg,
-                    parse_mode="MarkdownV2",
-                    reply_markup=keyboard
-                )
-                return
-
-            # Parse GIF type
-            gif_type = data.replace("gif_", "")  # wink, kiss, pose, etc.
-
-            user_mode = get_user_mode(user_id)
-            nsfw = user_mode in ["NSFW", "SPICY"]
-
-            # Check if NSFW GIF requested in SFW mode
-            if gif_type in ['tease', 'undress', 'nude_tease', 'nude_pose'] and not nsfw:
-                await query.answer("🔒 This GIF requires NSFW mode!", show_alert=True)
-                return
-
-            # ANSWER CALLBACK IMMEDIATELY to prevent timeout
-            await query.answer("🎬 Generating GIF... This will take ~1 minute")
-
-            # Send status message as NEW message (not edit)
-            status_msg = await context.bot.send_message(
-                chat_id=chat_id,
-                text="🎬 *Generating animated GIF\\.\\.\\.*\n\nThis may take 1\\-2 minutes\\. Creating multiple frames\\.\\.\\. 💜",
-                parse_mode="MarkdownV2"
-            )
-
-            try:
-                # Generate GIF
-                gif_bytes, gif_name = generate_luna_gif(scenario_type=gif_type, nsfw=nsfw)
-
-                # Deduct image credit/usage
-                use_image_generation(user_id)
-
-                # Delete status message
-                await status_msg.delete()
-
-                # Convert bytes to BytesIO for Telegram
-                from io import BytesIO
-                gif_file = BytesIO(gif_bytes)
-                gif_file.name = f"{gif_name.replace(' ', '_').lower()}.gif"
-
-                # Send the GIF as animation
-                await context.bot.send_animation(
-                    chat_id=chat_id,
-                    animation=gif_file,
-                    caption=f"🎬 {gif_name}"
-                )
-
-                # Get remaining images for upsell message
-                from src.payment import get_image_credits, has_trial_images, get_trial_status
-                plan = get_user_plan(user_id)
-
-                if plan:
-                    from src.payment.upsell import _load_json, SUBSCRIPTION_DB, PLANS
-                    subs = _load_json(SUBSCRIPTION_DB)
-                    used = subs[str(user_id)].get("images_used_this_month", 0)
-                    limit = PLANS[plan]["limits"]["images_per_month"]
-                    images_remaining = limit - used if limit != -1 else -1
-                else:
-                    images_remaining = get_image_credits(user_id)
-                    if has_trial_images(user_id):
-                        trial = get_trial_status(user_id)
-                        images_remaining += trial.get("images_remaining", 0)
-
-                # Send upsell message as new message
-                upsell_msg = get_after_image_upsell_message(images_remaining, plan)
-                await context.bot.send_message(
-                    chat_id=chat_id,
-                    text=escape_md(upsell_msg),
-                    parse_mode="MarkdownV2"
-                )
-
-            except Exception as e:
-                logger.exception(f"GIF generation failed: {e}")
-                # Delete status message
-                try:
-                    await status_msg.delete()
-                except:
-                    pass
-                # Send error message
-                await context.bot.send_message(
-                    chat_id=chat_id,
-                    text="⚠️ *GIF generation failed\\.*\n\nPlease try again\\.",
-                    parse_mode="MarkdownV2"
-                )
 
         # Handle voice toggle
         elif data == "voice_toggle":
