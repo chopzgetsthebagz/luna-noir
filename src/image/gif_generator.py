@@ -26,95 +26,114 @@ NEGATIVE_PROMPT = "child, teen, teenager, young girl, underage, baby face, multi
 GIF_SCENARIOS = {
     "wink": {
         "name": "Sultry Wink",
-        "frames": 3,  # REDUCED for faster generation
-        "duration": 500,  # ms per frame
+        "frames": 5,  # Increased for smoother animation
+        "duration": 400,  # ms per frame
         "descriptions": [
-            "looking at camera both eyes open smiling",
-            "looking at camera winking right eye closed smiling",
-            "looking at camera both eyes open smiling"
+            "wearing black crop top and black ripped jeans, looking at camera both eyes open seductive smile",
+            "wearing black crop top and black ripped jeans, looking at camera right eye starting to close slight smile",
+            "wearing black crop top and black ripped jeans, looking at camera winking right eye fully closed playful smile",
+            "wearing black crop top and black ripped jeans, looking at camera right eye opening slight smile",
+            "wearing black crop top and black ripped jeans, looking at camera both eyes open seductive smile"
         ]
     },
     "kiss": {
         "name": "Blowing Kiss",
-        "frames": 3,  # REDUCED for faster generation
-        "duration": 500,
+        "frames": 5,  # Increased for smoother animation
+        "duration": 400,
         "descriptions": [
-            "looking at camera smiling",
-            "blowing kiss puckered lips",
-            "looking at camera smiling"
+            "wearing black crop top and black ripped jeans, looking at camera hand at side smiling",
+            "wearing black crop top and black ripped jeans, looking at camera raising hand to lips smiling",
+            "wearing black crop top and black ripped jeans, looking at camera hand on lips puckered lips blowing kiss",
+            "wearing black crop top and black ripped jeans, looking at camera lowering hand from lips smiling",
+            "wearing black crop top and black ripped jeans, looking at camera hand at side smiling"
         ]
     },
     "pose": {
         "name": "Pose Sequence",
-        "frames": 3,  # REDUCED for faster generation
-        "duration": 600,
+        "frames": 4,  # Increased for smoother animation
+        "duration": 500,
         "descriptions": [
-            "standing hands on hips",
-            "standing hand in hair",
-            "standing hands on hips"
+            "wearing black crop top and black ripped jeans, standing hands on hips confident pose",
+            "wearing black crop top and black ripped jeans, standing one hand on hip other hand touching hair",
+            "wearing black crop top and black ripped jeans, standing both hands in hair seductive pose",
+            "wearing black crop top and black ripped jeans, standing hands on hips confident pose"
         ]
     },
     "tease": {
         "name": "Teasing",
-        "frames": 3,  # REDUCED for faster generation
-        "duration": 600,
+        "frames": 5,  # Increased for smoother animation
+        "duration": 500,
         "descriptions": [
-            "standing finger on lips playful",
-            "standing hand on chest seductive",
-            "standing finger on lips playful"
+            "wearing black lace lingerie bra and panties, standing finger on lips playful smile",
+            "wearing black lace lingerie bra and panties, standing hand sliding down neck seductive smile",
+            "wearing black lace lingerie bra and panties, standing hand on chest teasing smile",
+            "wearing black lace lingerie bra and panties, standing hand on hip confident smile",
+            "wearing black lace lingerie bra and panties, standing finger on lips playful smile"
         ]
     },
     "undress": {
         "name": "Undressing Sequence",
-        "frames": 4,  # REDUCED for faster generation
-        "duration": 700,
+        "frames": 6,  # Increased for smoother animation
+        "duration": 600,
         "descriptions": [
-            "standing fully clothed",
-            "standing shirt lifted showing bra",
-            "standing topless hands covering",
-            "standing topless hands lowered"
+            "wearing black crop top and black lace bra underneath, standing hands at sides",
+            "wearing black crop top and black lace bra underneath, standing hands gripping bottom of crop top",
+            "wearing black crop top lifted up showing black lace bra, standing hands holding crop top",
+            "wearing black lace bra only topless, standing hands reaching behind back to bra clasp",
+            "topless covering breasts with hands, standing shy smile",
+            "topless hands lowered to sides breasts visible, standing confident smile"
         ]
     },
     "dance": {
         "name": "Dancing",
-        "frames": 4,  # REDUCED from 8 for faster generation
-        "duration": 500,
+        "frames": 6,  # Increased for smoother animation
+        "duration": 400,
         "descriptions": [
-            "dancing arms raised",
-            "dancing hips swaying right",
-            "dancing arms out",
-            "dancing hips swaying left"
+            "wearing black crop top and black ripped jeans, dancing arms raised above head hips centered",
+            "wearing black crop top and black ripped jeans, dancing arms out to sides hips swaying right",
+            "wearing black crop top and black ripped jeans, dancing arms lowered hips centered",
+            "wearing black crop top and black ripped jeans, dancing arms out to sides hips swaying left",
+            "wearing black crop top and black ripped jeans, dancing arms raised above head hips centered",
+            "wearing black crop top and black ripped jeans, dancing arms out to sides hips swaying right"
         ]
     },
     "rotate": {
         "name": "360° Rotation",
-        "frames": 4,  # REDUCED from 8 for faster generation
-        "duration": 600,
+        "frames": 8,  # Increased for smoother rotation
+        "duration": 400,
         "descriptions": [
-            "full body facing camera",
-            "full body right side view",
-            "full body back view",
-            "full body left side view"
+            "wearing black crop top and black ripped jeans, full body standing facing camera front view",
+            "wearing black crop top and black ripped jeans, full body standing turned 45 degrees right showing right side",
+            "wearing black crop top and black ripped jeans, full body standing right side profile view",
+            "wearing black crop top and black ripped jeans, full body standing turned 135 degrees showing back right",
+            "wearing black crop top and black ripped jeans, full body standing back view facing away",
+            "wearing black crop top and black ripped jeans, full body standing turned 225 degrees showing back left",
+            "wearing black crop top and black ripped jeans, full body standing left side profile view",
+            "wearing black crop top and black ripped jeans, full body standing turned 315 degrees showing left front"
         ]
     },
     "nude_tease": {
         "name": "Nude Teasing",
-        "frames": 3,  # REDUCED for faster generation
-        "duration": 700,
+        "frames": 5,  # Increased for smoother animation
+        "duration": 500,
         "descriptions": [
-            "nude covering breasts",
-            "nude hands on hips exposed",
-            "nude covering breasts"
+            "completely nude, standing covering breasts with hands and covering crotch with hand shy smile",
+            "completely nude, standing covering breasts with one hand other hand lowering from crotch teasing smile",
+            "completely nude, standing hands on hips breasts and body fully visible confident smile",
+            "completely nude, standing one hand in hair other hand on hip seductive smile",
+            "completely nude, standing covering breasts with hands and covering crotch with hand shy smile"
         ]
     },
     "nude_pose": {
         "name": "Nude Pose Sequence",
-        "frames": 3,  # REDUCED for faster generation
-        "duration": 600,
+        "frames": 5,  # Increased for smoother animation
+        "duration": 500,
         "descriptions": [
-            "nude hands on hips",
-            "nude hand in hair",
-            "nude hands on hips"
+            "completely nude, standing hands on hips confident pose front view",
+            "completely nude, standing one hand on hip other hand touching hair seductive pose",
+            "completely nude, standing both hands in hair sensual pose",
+            "completely nude, standing one hand on hip other hand at side confident pose",
+            "completely nude, standing hands on hips confident pose front view"
         ]
     }
 }
