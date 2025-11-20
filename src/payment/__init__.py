@@ -30,6 +30,14 @@ from .upsell_prompts import (
     should_show_upgrade_reminder
 )
 
+from .test_mode import (
+    simulate_subscription_purchase,
+    simulate_credits_purchase,
+    simulate_free_trial,
+    reset_user_payments,
+    get_test_commands_help
+)
+
 __all__ = [
     # Subscription management
     "get_user_plan",

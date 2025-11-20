@@ -1833,6 +1833,154 @@ def create_bot(token: str):
 
         await update.message.reply_text(escape_md("\n".join(msg_parts)), parse_mode="MarkdownV2")
 
+    # ============================================================================
+    # TEST MODE PAYMENT COMMANDS
+    # ============================================================================
+
+    async def test_buy_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /testbuy command - simulate purchasing subscriptions or credits"""
+        from src.payment.test_mode import simulate_subscription_purchase, simulate_credits_purchase
+
+        user_id = update.effective_user.id
+
+        if not context.args:
+            msg = """
+🧪 **TEST MODE - Simulate Purchase**
+
+**Usage:** `/testbuy <product>`
+
+**Subscriptions:**
+• `/testbuy basic` - Basic Premium ($9.99/mo)
+• `/testbuy vip` - VIP Premium ($19.99/mo)
+• `/testbuy ultimate` - Ultimate ($49.99/mo)
+
+**Credits:**
+• `/testbuy 5pack` - 5 image credits
+• `/testbuy 20pack` - 20 image credits
+• `/testbuy 50pack` - 60 image credits (50+10 bonus)
+
+**Example:** `/testbuy vip`
+"""
+            await update.message.reply_text(escape_md(msg), parse_mode="MarkdownV2")
+            return
+
+        product = context.args[0].lower()
+
+        # Handle subscriptions
+        if product in ["basic", "vip", "ultimate"]:
+            success = simulate_subscription_purchase(user_id, product)
+            if success:
+                from src.payment import PLANS
+                plan_info = PLANS[product]
+                msg = f"""
+✅ **TEST PURCHASE SUCCESSFUL!**
+
+You now have: **{plan_info['name']}**
+Price: {plan_info['price']}
+
+**Features unlocked:**
+{chr(10).join(plan_info['features'])}
+
+Try generating images with `/generate` or click the menu button!
+
+_Note: This is test mode. No real money was charged._
+"""
+                await update.message.reply_text(escape_md(msg), parse_mode="MarkdownV2")
+            else:
+                await update.message.reply_text("❌ Purchase failed. Try again.", parse_mode="MarkdownV2")
+
+        # Handle credit packs
+        elif product in ["5pack", "20pack", "50pack"]:
+            pack_name = product.replace("pack", "_pack")
+            success = simulate_credits_purchase(user_id, pack_name)
+            if success:
+                from src.payment import IMAGE_CREDIT_PRICES, get_image_credits
+                pack_info = IMAGE_CREDIT_PRICES[pack_name]
+                total_credits = get_image_credits(user_id)
+
+                credits_received = pack_info["credits"]
+                if "bonus" in pack_info:
+                    credits_received += pack_info["bonus"]
+
+                msg = f"""
+✅ **TEST PURCHASE SUCCESSFUL!**
+
+You bought: **{credits_received} Image Credits**
+Price: {pack_info['price']}
+
+**Your total credits:** {total_credits}
+
+Generate images with `/generate` or the menu!
+
+_Note: This is test mode. No real money was charged._
+"""
+                await update.message.reply_text(escape_md(msg), parse_mode="MarkdownV2")
+            else:
+                await update.message.reply_text("❌ Purchase failed. Try again.", parse_mode="MarkdownV2")
+
+        else:
+            await update.message.reply_text(
+                f"❌ Unknown product: `{product}`\n\nUse `/testbuy` to see available options.",
+                parse_mode="MarkdownV2"
+            )
+
+    async def test_trial_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /testtrial command - start free trial"""
+        from src.payment.test_mode import simulate_free_trial
+        from src.payment import FREE_TRIAL
+
+        user_id = update.effective_user.id
+        success = simulate_free_trial(user_id)
+
+        if success:
+            msg = f"""
+🎉 **FREE TRIAL ACTIVATED!**
+
+**You get:**
+• {FREE_TRIAL['duration_days']} days of Premium access
+• {FREE_TRIAL['images_included']} FREE AI images
+• All premium features unlocked
+
+**Features:**
+{chr(10).join(f"• {f}" for f in FREE_TRIAL['features'])}
+
+Try it now with `/generate` or the menu!
+
+_Note: This is test mode. No credit card required._
+"""
+            await update.message.reply_text(escape_md(msg), parse_mode="MarkdownV2")
+        else:
+            msg = "❌ You already used your free trial!\n\nUse `/testbuy` to purchase a plan."
+            await update.message.reply_text(escape_md(msg), parse_mode="MarkdownV2")
+
+    async def test_reset_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /testreset command - reset all payment data"""
+        from src.payment.test_mode import reset_user_payments
+
+        user_id = update.effective_user.id
+        reset_user_payments(user_id)
+
+        msg = """
+🔄 **PAYMENT DATA RESET**
+
+All your test purchases have been cleared:
+• Subscriptions removed
+• Credits removed
+• Trial status reset
+
+You can now test the payment flow from scratch!
+
+Use `/testhelp` to see test commands.
+"""
+        await update.message.reply_text(escape_md(msg), parse_mode="MarkdownV2")
+
+    async def test_help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /testhelp command - show test mode help"""
+        from src.payment.test_mode import get_test_commands_help
+
+        msg = get_test_commands_help()
+        await update.message.reply_text(escape_md(msg), parse_mode="MarkdownV2")
+
     # Register handlers
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_cmd))
@@ -1853,6 +2001,12 @@ def create_bot(token: str):
     app.add_handler(CommandHandler("upgrade", upgrade_cmd))
     app.add_handler(CommandHandler("preferences", preferences_cmd))
     app.add_handler(CommandHandler("reset", reset))
+
+    # Test mode payment commands
+    app.add_handler(CommandHandler("testbuy", test_buy_cmd))
+    app.add_handler(CommandHandler("testtrial", test_trial_cmd))
+    app.add_handler(CommandHandler("testreset", test_reset_cmd))
+    app.add_handler(CommandHandler("testhelp", test_help_cmd))
 
     # Register callback handlers with patterns
     app.add_handler(CallbackQueryHandler(menu_callback, pattern="^menu_"))
